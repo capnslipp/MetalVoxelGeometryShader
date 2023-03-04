@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA3C8DB429B30EE90097A95D /* MDLVoxelAsset.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA3C8DA129B30EC50097A95D /* MDLVoxelAsset.framework */; };
+		FA3C8DB529B30EE90097A95D /* MDLVoxelAsset.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FA3C8DA129B30EC50097A95D /* MDLVoxelAsset.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FA7780A929AEFA45005092B1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7780A829AEFA45005092B1 /* AppDelegate.swift */; };
 		FA7780AB29AEFA45005092B1 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7780AA29AEFA45005092B1 /* GameViewController.swift */; };
 		FA7780AD29AEFA45005092B1 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7780AC29AEFA45005092B1 /* Renderer.swift */; };
@@ -15,7 +17,74 @@
 		FA7780B529AEFA49005092B1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA7780B329AEFA49005092B1 /* Main.storyboard */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		FA3C8D9E29B30EC50097A95D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FA2685821CEA9A71003B86C8;
+			remoteInfo = "MDLVoxelAsset (iOS)";
+		};
+		FA3C8DA029B30EC50097A95D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FA9CACCA1CF17E0200B1ABA4;
+			remoteInfo = "MDLVoxelAsset (OS X)";
+		};
+		FA3C8DA229B30EC50097A95D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FA26858C1CEA9A72003B86C8;
+			remoteInfo = "MDLVoxelAssetTests (iOS)";
+		};
+		FA3C8DA429B30EC50097A95D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FA9CACD31CF17E0200B1ABA4;
+			remoteInfo = "MDLVoxelAssetTests (OS X)";
+		};
+		FA3C8DA629B30EC50097A95D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FA0ADEE21CF00A270054DCAA;
+			remoteInfo = "VoxViewer (iOS)";
+		};
+		FA3C8DA829B30EC50097A95D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FA9695001CF1725000DC632A;
+			remoteInfo = "VoxViewer (OS X)";
+		};
+		FA3C8DAA29B30EC50097A95D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FAF7D4601E73E1B7007CFA66;
+			remoteInfo = convertToJSON;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FA3C8DB629B30EE90097A95D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FA3C8DB529B30EE90097A95D /* MDLVoxelAsset.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MDLVoxelAsset.xcodeproj; path = ../MDLVoxelAsset/MDLVoxelAsset.xcodeproj; sourceTree = "<group>"; };
 		FA7780A529AEFA45005092B1 /* MetalVoxelGeometryShader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalVoxelGeometryShader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA7780A829AEFA45005092B1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FA7780AA29AEFA45005092B1 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
@@ -32,17 +101,41 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA3C8DB429B30EE90097A95D /* MDLVoxelAsset.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FA3C8D9229B30EAB0097A95D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FA3C8D9529B30EC50097A95D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FA3C8D9F29B30EC50097A95D /* MDLVoxelAsset.framework */,
+				FA3C8DA129B30EC50097A95D /* MDLVoxelAsset.framework */,
+				FA3C8DA329B30EC50097A95D /* MDLVoxelAssetTests.xctest */,
+				FA3C8DA529B30EC50097A95D /* MDLVoxelAssetTests.xctest */,
+				FA3C8DA729B30EC50097A95D /* VoxViewer.app */,
+				FA3C8DA929B30EC50097A95D /* VoxViewer.app */,
+				FA3C8DAB29B30EC50097A95D /* convertToJSON */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		FA77809C29AEFA45005092B1 = {
 			isa = PBXGroup;
 			children = (
 				FA7780A729AEFA45005092B1 /* MetalVoxelGeometryShader */,
 				FA7780A629AEFA45005092B1 /* Products */,
+				FA3C8D9229B30EAB0097A95D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -79,6 +172,7 @@
 				FA7780A129AEFA45005092B1 /* Sources */,
 				FA7780A229AEFA45005092B1 /* Frameworks */,
 				FA7780A329AEFA45005092B1 /* Resources */,
+				FA3C8DB629B30EE90097A95D /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -115,12 +209,70 @@
 			mainGroup = FA77809C29AEFA45005092B1;
 			productRefGroup = FA7780A629AEFA45005092B1 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = FA3C8D9529B30EC50097A95D /* Products */;
+					ProjectRef = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				FA7780A429AEFA45005092B1 /* MetalVoxelGeometryShader */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		FA3C8D9F29B30EC50097A95D /* MDLVoxelAsset.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MDLVoxelAsset.framework;
+			remoteRef = FA3C8D9E29B30EC50097A95D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FA3C8DA129B30EC50097A95D /* MDLVoxelAsset.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MDLVoxelAsset.framework;
+			remoteRef = FA3C8DA029B30EC50097A95D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FA3C8DA329B30EC50097A95D /* MDLVoxelAssetTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = MDLVoxelAssetTests.xctest;
+			remoteRef = FA3C8DA229B30EC50097A95D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FA3C8DA529B30EC50097A95D /* MDLVoxelAssetTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = MDLVoxelAssetTests.xctest;
+			remoteRef = FA3C8DA429B30EC50097A95D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FA3C8DA729B30EC50097A95D /* VoxViewer.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = VoxViewer.app;
+			remoteRef = FA3C8DA629B30EC50097A95D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FA3C8DA929B30EC50097A95D /* VoxViewer.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = VoxViewer.app;
+			remoteRef = FA3C8DA829B30EC50097A95D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FA3C8DAB29B30EC50097A95D /* convertToJSON */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = convertToJSON;
+			remoteRef = FA3C8DAA29B30EC50097A95D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		FA7780A329AEFA45005092B1 /* Resources */ = {
