@@ -10,6 +10,7 @@
 import Metal
 import MetalKit
 import simd
+import MDLVoxelAsset
 
 
 
@@ -30,6 +31,7 @@ class Renderer : NSObject, MTKViewDelegate
 	var pipelineState: MTLRenderPipelineState
 	var depthState: MTLDepthStencilState
 	var colorMap: MTLTexture
+	var voxelTexture: MTLTexture
 	
 	let inFlightSemaphore = DispatchSemaphore(value: maxBuffersInFlight)
 	
@@ -94,6 +96,20 @@ class Renderer : NSObject, MTKViewDelegate
 			colorMap = try Renderer.loadTexture(device: device, textureName: "ColorMap")
 		} catch {
 			print("Unable to load texture. Error info: \(error)")
+			return nil
+		}
+		
+		do {
+			let path = Bundle.main.path(forResource: "master.Brownstone.NSide", ofType: "vox")!
+			let asset = MDLVoxelAsset(url: URL(fileURLWithPath: path), options: [
+				kMDLVoxelAssetOptionCalculateShellLevels: false,
+				kMDLVoxelAssetOptionSkipNonZeroShellMesh: false,
+				kMDLVoxelAssetOptionConvertZUpToYUp: false,
+				kMDLVoxelAssetOptionMeshGenerationMode: MDLVoxelAssetMeshGenerationMode.skip.rawValue,
+			])
+			self.voxelTexture = device.makeVoxel3DTextureRGBA(fromAsset: asset, model: asset.models.first!)!
+		} catch {
+			print("Unable to generate texture. Error info: \(error)")
 			return nil
 		}
 		
