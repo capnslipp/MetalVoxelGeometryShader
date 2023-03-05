@@ -37,12 +37,15 @@ typedef NS_ENUM(EnumBackingType, VertexAttribute)
 typedef NS_ENUM(EnumBackingType, TextureIndex)
 {
 	TextureIndexColor    = 0,
+	TextureIndexVoxel3DColor = 1,
 };
 
 typedef struct
 {
-	matrix_float4x4 projectionMatrix;
+	matrix_float4x4 modelMatrix;
+	matrix_float4x4 viewMatrix;
 	matrix_float4x4 modelViewMatrix;
+	matrix_float4x4 projectionMatrix;
 } Uniforms;
 
 #endif /* ShaderTypes_h */

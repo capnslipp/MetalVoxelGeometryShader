@@ -23,6 +23,7 @@ typedef struct {
 typedef struct {
 	float4 position [[position]];
 	float2 texCoord;
+	float4 voxelCoord;
 } ColorInOut;
 
 vertex ColorInOut vertexShader(
@@ -34,6 +35,7 @@ vertex ColorInOut vertexShader(
 	float4 position = float4(in.position, 1.0);
 	out.position = uniforms.projectionMatrix * uniforms.modelViewMatrix * position;
 	out.texCoord = in.texCoord;
+	out.voxelCoord = uniforms.modelMatrix * position;
 
 	return out;
 }
@@ -41,7 +43,8 @@ vertex ColorInOut vertexShader(
 fragment float4 fragmentShader(
 	ColorInOut in [[stage_in]],
 	constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]],
-	texture2d<half> colorMap [[ texture(TextureIndexColor) ]]
+	texture2d<half> colorMap [[ texture(TextureIndexColor) ]],
+	texture3d<half> voxel3DTexture [[ texture(TextureIndexVoxel3DColor) ]]
 ) {
 	constexpr sampler colorSampler(
 		mip_filter::linear,
@@ -49,7 +52,8 @@ fragment float4 fragmentShader(
 		min_filter::linear
 	);
 	
-	half4 colorSample	= colorMap.sample(colorSampler, in.texCoord.xy);
+	//half4 colorSample = colorMap.sample(colorSampler, in.texCoord.xy);
+	half4 colorSample = voxel3DTexture.sample(colorSampler, in.voxelCoord.xyz);
 	
 	return float4(colorSample);
 }

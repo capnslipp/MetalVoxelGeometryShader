@@ -235,7 +235,9 @@ class Renderer : NSObject, MTKViewDelegate
 
 		let rotationAxis = SIMD3<Float>(1, 1, 0)
 		let modelMatrix = matrix4x4_rotation(radians: rotation, axis: rotationAxis)
+		uniforms[0].modelMatrix = modelMatrix
 		let viewMatrix = matrix4x4_translation(0.0, 0.0, -8.0)
+		uniforms[0].viewMatrix = viewMatrix
 		uniforms[0].modelViewMatrix = simd_mul(viewMatrix, modelMatrix)
 		rotation += 0.01
 	}
@@ -291,6 +293,8 @@ class Renderer : NSObject, MTKViewDelegate
 					}
 					
 					renderEncoder.setFragmentTexture(colorMap, index: TextureIndex.color.rawValue)
+					
+					renderEncoder.setFragmentTexture(self.voxelTexture, index: TextureIndex.voxel3DColor.rawValue)
 					
 					for submesh in mesh.submeshes {
 						renderEncoder.drawIndexedPrimitives(
