@@ -325,9 +325,9 @@ class Renderer : NSObject, MTKViewDelegate
 					//	}
 					//}
 					
-					renderEncoder.setFragmentTexture(colorMap, index: TextureIndex.color.rawValue)
+					//renderEncoder.setFragmentTexture(colorMap, index: TextureIndex.color.rawValue)
 					
-					renderEncoder.setFragmentTexture(self.voxelTexture, index: TextureIndex.voxel3DColor.rawValue)
+					//renderEncoder.setFragmentTexture(self.voxelTexture, index: TextureIndex.voxel3DColor.rawValue)
 					
 					//for submesh in mesh.submeshes {
 					//	renderEncoder.drawIndexedPrimitives(

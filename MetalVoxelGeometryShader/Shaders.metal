@@ -36,8 +36,10 @@ void meshObjectShader(
 	mesh_grid_properties meshGridProperties
 ) {
 	if (cubeI < kCubesPerBlock) {
-		constexpr sampler colorSampler(mip_filter::linear, mag_filter::linear, min_filter::linear);
-		payload[cubeI].color = voxel3DTexture.sample(colorSampler, float3(positionInGrid));
+		constexpr sampler colorSampler(coord::pixel);
+		uint3 voxelIndex = uint3(positionInGrid.x + 39, positionInGrid.y + 19, positionInGrid.z);
+		payload[cubeI].color = voxel3DTexture.sample(colorSampler, float3(voxelIndex));
+		//payload[cubeI].color = voxel3DTexture.read(voxelIndex);
 		payload[cubeI].transform = uniforms.projectionMatrix * uniforms.modelViewMatrix;
 	}
 	
@@ -145,48 +147,17 @@ void meshShader(
 
 
 
-// MARK: Vertex Stage
-
-typedef struct {
-	float3 position [[attribute(VertexAttributePosition)]];
-	float2 texCoord [[attribute(VertexAttributeTexcoord)]];
-} Vertex;
-
-typedef struct {
-	float4 position [[position]];
-	float2 texCoord;
-	float3 voxelCoord;
-} ColorInOut;
-
-
-vertex ColorInOut vertexShader(
-	Vertex in [[stage_in]],
-	constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]]
-) {
-	ColorInOut out;
-	
-	float4 position = float4(in.position, 1.0);
-	out.position = uniforms.projectionMatrix * uniforms.modelViewMatrix * position;
-	out.texCoord = in.texCoord;
-	out.voxelCoord = (uniforms.modelMatrix * position).xyz;
-
-	return out;
-}
-
-
-
 // MARK: Fragment Stage
 
+struct FragmentIn
+{
+	MeshVertexData vertexData;
+	MeshPrimitiveData primitiveData;
+};
+
 fragment float4 fragmentShader(
-	ColorInOut in [[stage_in]],
-	constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]],
-	texture2d<half> colorMap [[ texture(TextureIndexColor) ]],
-	texture3d<half> voxel3DTexture [[ texture(TextureIndexVoxel3DColor) ]]
+	FragmentIn in [[stage_in]],
+	constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]]
 ) {
-	constexpr sampler colorSampler(mip_filter::linear, mag_filter::linear, min_filter::linear);
-	
-	//half4 colorSample = colorMap.sample(colorSampler, in.texCoord.xy);
-	half4 colorSample = voxel3DTexture.sample(colorSampler, in.voxelCoord);
-	
-	return float4(colorSample);
+	return float4(in.primitiveData.color);
 }
