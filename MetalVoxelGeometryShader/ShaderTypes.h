@@ -8,18 +8,46 @@
 //
 //  Header containing types and enum constants shared between Metal shaders and Swift/ObjC source
 //
-#ifndef ShaderTypes_h
-#define ShaderTypes_h
+
+#pragma once
+
 
 #ifdef __METAL_VERSION__
-#define NS_ENUM(_type, _name) enum _name : _type _name; enum _name : _type
-typedef metal::int32_t EnumBackingType;
+	#define NS_ENUM(_type, _name) enum _name : _type _name; enum _name : _type
+	typedef metal::int32_t EnumBackingType;
 #else
-#import <Foundation/Foundation.h>
-typedef NSInteger EnumBackingType;
+	#import <Foundation/Foundation.h>
+	typedef NSInteger EnumBackingType;
 #endif
 
 #include <simd/simd.h>
+
+
+
+#if defined(__METAL_VERSION__)
+	#define CONSTANT constant
+#elif defined(__cplusplus)
+	#define CONSTANT constexpr constant
+#else // C/Obj-C/Swift
+	#define CONSTANT const
+#endif
+
+
+
+static CONSTANT size_t kMeshPayloadMemoryLength = (8 + 8) + (4 * 16);
+
+static CONSTANT uint kCubesPerBlockX = 1;
+static CONSTANT uint kCubesPerBlockY = 1;
+static CONSTANT uint kCubesPerBlockZ = 1;
+static CONSTANT uint kCubesPerBlock = kCubesPerBlockX * kCubesPerBlockY * kCubesPerBlockZ;
+
+static CONSTANT uint kVertexCountPerCube = 8;
+static CONSTANT uint kPrimitiveCountPerCube = 12;//6 * 2;
+//static CONSTANT uint kIndexCountPerCube = kPrimitiveCountPerCube * 3;
+
+static CONSTANT uint kTrianglesPerModel = kPrimitiveCountPerCube;
+static CONSTANT uint kThreadsPerCube = (kVertexCountPerCube > kPrimitiveCountPerCube) ? kVertexCountPerCube : kPrimitiveCountPerCube;
+
 
 typedef NS_ENUM(EnumBackingType, BufferIndex)
 {
@@ -47,6 +75,3 @@ typedef struct
 	matrix_float4x4 modelViewMatrix;
 	matrix_float4x4 projectionMatrix;
 } Uniforms;
-
-#endif /* ShaderTypes_h */
-

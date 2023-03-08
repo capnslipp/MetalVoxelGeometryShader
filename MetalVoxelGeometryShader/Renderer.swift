@@ -11,6 +11,7 @@ import Metal
 import MetalKit
 import simd
 import MDLVoxelAsset
+import With
 
 
 
@@ -45,7 +46,7 @@ class Renderer : NSObject, MTKViewDelegate
 	
 	var rotation: Float = 0
 	
-	var mesh: MTKMesh
+	//var mesh: MTKMesh
 	
 	init?(metalKitView: MTKView)
 	{
@@ -67,13 +68,12 @@ class Renderer : NSObject, MTKViewDelegate
 		metalKitView.colorPixelFormat = MTLPixelFormat.bgra8Unorm_srgb
 		metalKitView.sampleCount = 1
 		
-		let mtlVertexDescriptor = Renderer.buildMetalVertexDescriptor()
+		//let mtlVertexDescriptor = Renderer.buildMetalVertexDescriptor()
 		
 		do {
-			pipelineState = try Renderer.buildRenderPipelineWithDevice(
+			pipelineState = try Renderer.buildMeshRenderPipelineWithDevice(
 				device: device,
-				metalKitView: metalKitView,
-				mtlVertexDescriptor: mtlVertexDescriptor
+				metalKitView: metalKitView
 			)
 		} catch {
 			print("Unable to compile render pipeline state. Error info: \(error)")
@@ -85,12 +85,12 @@ class Renderer : NSObject, MTKViewDelegate
 		depthStateDescriptor.isDepthWriteEnabled = true
 		self.depthState = device.makeDepthStencilState(descriptor:depthStateDescriptor)!
 		
-		do {
-			mesh = try Renderer.buildMesh(device: device, mtlVertexDescriptor: mtlVertexDescriptor)
-		} catch {
-			print("Unable to build MetalKit Mesh. Error info: \(error)")
-			return nil
-		}
+		//do {
+		//	mesh = try Renderer.buildMesh(device: device, mtlVertexDescriptor: mtlVertexDescriptor)
+		//} catch {
+		//	print("Unable to build MetalKit Mesh. Error info: \(error)")
+		//	return nil
+		//}
 		
 		do {
 			colorMap = try Renderer.loadTexture(device: device, textureName: "ColorMap")
@@ -166,6 +166,36 @@ class Renderer : NSObject, MTKViewDelegate
 		pipelineDescriptor.stencilAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
 
 		return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+	}
+
+	class func buildMeshRenderPipelineWithDevice(
+		device: MTLDevice,
+		metalKitView: MTKView
+	) throws -> MTLRenderPipelineState
+	{
+		let meshPipelineDescriptor = with(MTLMeshRenderPipelineDescriptor()) {
+			$0.label = "MeshRenderPipeline"
+			$0.rasterSampleCount = metalKitView.sampleCount
+			
+			let library = device.makeDefaultLibrary()
+			
+			let meshObjectFunction = library?.makeFunction(name: "meshObjectShader")
+			$0.objectFunction = meshObjectFunction
+			let meshFunction = library?.makeFunction(name: "meshShader")
+			$0.meshFunction = meshFunction
+			let fragmentFunction = library?.makeFunction(name: "fragmentShader")
+			$0.fragmentFunction = fragmentFunction
+			//$0.payloadMemoryLength = kMeshPayloadMemoryLength
+			//$0.maxTotalThreadsPerObjectThreadgroup = Int(kCubesPerBlock)
+			//$0.maxTotalThreadsPerMeshThreadgroup = Int(kVertexCountPerCube)
+			
+			$0.colorAttachments[0].pixelFormat = metalKitView.colorPixelFormat
+			$0.depthAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
+			$0.stencilAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
+		}
+		
+		let (state, _) = try device.makeRenderPipelineState(descriptor: meshPipelineDescriptor, options: [])
+		return state
 	}
 
 	class func buildMesh(
@@ -272,39 +302,54 @@ class Renderer : NSObject, MTKViewDelegate
 					
 					renderEncoder.setCullMode(.back)
 					
-					renderEncoder.setFrontFacing(.counterClockwise)
+					renderEncoder.setFrontFacing(.clockwise)
 					
 					renderEncoder.setRenderPipelineState(pipelineState)
 					
 					renderEncoder.setDepthStencilState(depthState)
 					
-					renderEncoder.setVertexBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
+					//renderEncoder.setObjectBuffer(objectBuffer, offset: 0, index: 0)
+					renderEncoder.setObjectBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: 0)
+					//renderEncoder.setMeshTexture(meshTexture, atIndex: 2)
+					//renderEncoder.setVertexBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
 					renderEncoder.setFragmentBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
 					
-					for (index, element) in mesh.vertexDescriptor.layouts.enumerated() {
-						guard let layout = element as? MDLVertexBufferLayout else {
-							return
-						}
-						
-						if layout.stride != 0 {
-							let buffer = mesh.vertexBuffers[index]
-							renderEncoder.setVertexBuffer(buffer.buffer, offset:buffer.offset, index: index)
-						}
-					}
+					//for (index, element) in mesh.vertexDescriptor.layouts.enumerated() {
+					//	guard let layout = element as? MDLVertexBufferLayout else {
+					//		return
+					//	}
+					//	
+					//	if layout.stride != 0 {
+					//		let buffer = mesh.vertexBuffers[index]
+					//		renderEncoder.setVertexBuffer(buffer.buffer, offset:buffer.offset, index: index)
+					//	}
+					//}
 					
 					renderEncoder.setFragmentTexture(colorMap, index: TextureIndex.color.rawValue)
 					
 					renderEncoder.setFragmentTexture(self.voxelTexture, index: TextureIndex.voxel3DColor.rawValue)
 					
-					for submesh in mesh.submeshes {
-						renderEncoder.drawIndexedPrimitives(
-							type: submesh.primitiveType,
-							indexCount: submesh.indexCount,
-							indexType: submesh.indexType,
-							indexBuffer: submesh.indexBuffer.buffer,
-							indexBufferOffset: submesh.indexBuffer.offset
-						)
-					}
+					//for submesh in mesh.submeshes {
+					//	renderEncoder.drawIndexedPrimitives(
+					//		type: submesh.primitiveType,
+					//		indexCount: submesh.indexCount,
+					//		indexType: submesh.indexType,
+					//		indexBuffer: submesh.indexBuffer.buffer,
+					//		indexBufferOffset: submesh.indexBuffer.offset
+					//	)
+					//}
+					
+					renderEncoder.setObjectTexture(self.voxelTexture, index: 0)
+					
+					let objectThreads = MTLSize(width: Int(kCubesPerBlockX), height: Int(kCubesPerBlockY), depth: Int(kCubesPerBlockZ))
+					//let objectGroups = MTLSize(
+					//	width: self.voxelTexture.width / objectThreads.width,
+					//	height: self.voxelTexture.height / objectThreads.height,
+					//	depth: self.voxelTexture.depth / objectThreads.depth
+					//)
+					let objectGroups = MTLSize(width: 1, height: 1, depth: 1)
+					let meshThreads = MTLSize(width: Int(kThreadsPerCube), height: 1, depth: 1)
+					renderEncoder.drawMeshThreadgroups(objectGroups, threadsPerObjectThreadgroup: objectThreads, threadsPerMeshThreadgroup: meshThreads)
 					
 					renderEncoder.popDebugGroup()
 					
