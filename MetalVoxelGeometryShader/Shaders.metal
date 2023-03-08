@@ -133,9 +133,9 @@ void meshShader(
 	
 	if (threadI < kPrimitiveCountPerCube) {
 		MeshTriIndexData triIndices = calculateTriIndices(threadI);
-		outputMesh.set_index(threadI + 0, triIndices.indices[0]);
-		outputMesh.set_index(threadI + 1, triIndices.indices[1]);
-		outputMesh.set_index(threadI + 2, triIndices.indices[2]);
+		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
+		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
+		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
 	}
 	
 	if (threadI < kPrimitiveCountPerCube)
