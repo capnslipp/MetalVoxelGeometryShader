@@ -302,7 +302,7 @@ class Renderer : NSObject, MTKViewDelegate
 					
 					renderEncoder.setCullMode(.back)
 					
-					renderEncoder.setFrontFacing(.clockwise)
+					renderEncoder.setFrontFacing(.counterClockwise)
 					
 					renderEncoder.setRenderPipelineState(pipelineState)
 					
