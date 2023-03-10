@@ -21,13 +21,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		FA3C8D9E29B30EC50097A95D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = FA2685821CEA9A71003B86C8;
-			remoteInfo = "MDLVoxelAsset (iOS)";
-		};
 		FA3C8DA029B30EC50097A95D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
@@ -125,7 +118,6 @@
 		FA3C8D9529B30EC50097A95D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FA3C8D9F29B30EC50097A95D /* MDLVoxelAsset.framework */,
 				FA3C8DA129B30EC50097A95D /* MDLVoxelAsset.framework */,
 				FA3C8DA329B30EC50097A95D /* MDLVoxelAssetTests.xctest */,
 				FA3C8DA529B30EC50097A95D /* MDLVoxelAssetTests.xctest */,
@@ -237,13 +229,6 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		FA3C8D9F29B30EC50097A95D /* MDLVoxelAsset.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = MDLVoxelAsset.framework;
-			remoteRef = FA3C8D9E29B30EC50097A95D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		FA3C8DA129B30EC50097A95D /* MDLVoxelAsset.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
