@@ -51,9 +51,9 @@ static CONSTANT uint kThreadsPerCube = (kVertexCountPerCube > kPrimitiveCountPer
 
 typedef NS_ENUM(EnumBackingType, BufferIndex)
 {
-	BufferIndexMeshPositions = 0,
-	BufferIndexMeshGenerics  = 1,
-	BufferIndexUniforms      = 2
+	BufferIndexUniforms      = 0,
+	BufferIndexMeshPositions = 1,
+	BufferIndexMeshGenerics  = 2
 };
 
 typedef NS_ENUM(EnumBackingType, VertexAttribute)

@@ -98,12 +98,27 @@ MeshTriIndexData calculateTriIndices(uint threadI) {
 
 typedef struct {
 	half4 color;
+	half3 normal;
 	float3 voxelCoord;
 } MeshPrimitiveData;
+
+half3 calculateNormal(int threadI) {
+	half3 normal = { 0 };
+	// calculates for:
+	// 	0 & 1:   (-1, 0, 0)
+	// 	2 & 3:   (+1, 0, 0)
+	// 	4 & 5:   (0, -1, 0)
+	// 	6 & 7:   (0, +1, 0)
+	// 	8 & 9:   (0, 0, -1)
+	// 	10 & 11: (0, 0, +1)
+	normal[threadI / 4 % 3] = (threadI / 2 % 2) * 2 - 1;
+	return normal;
+}
 
 MeshPrimitiveData calculatePrimitive(uint threadI, uint3 positionInGrid, const object_data MeshPayload& payload) {
 	return (MeshPrimitiveData){
 		/* color: */ payload.color,
+		/* normal: */ calculateNormal(threadI),
 		/* voxelCoord: */ float3(positionInGrid),
 	};
 }
@@ -155,9 +170,22 @@ struct FragmentIn
 	MeshPrimitiveData primitiveData;
 };
 
-fragment float4 fragmentShader(
+fragment half4 fragmentShader(
 	FragmentIn in [[stage_in]],
 	constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]]
 ) {
-	return float4(in.primitiveData.color);
+	half4 color = in.primitiveData.color;
+	
+	half3 normal = in.primitiveData.normal;
+	half3 lightDirection = normalize(half3(1, 1, 1));
+	
+	half ambientIntensity = 0.0;
+	half lightIntensity = 10.0;
+	half colorIntensity = (0.5 + 0.5 * dot(normal, lightDirection)) * lightIntensity + ambientIntensity;
+	colorIntensity = colorIntensity / (1.0 + colorIntensity);
+	
+	return half4(
+		color.rgb * colorIntensity,
+		color.a
+	);
 }
