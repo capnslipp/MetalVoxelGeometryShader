@@ -55,7 +55,7 @@ extension MTLDevice
 			d.depth = size.depth
 			
 			d.cpuCacheMode = .writeCombined
-			d.storageMode = .managed // TODO: try .private
+			d.storageMode = .managed
 		}
 		
 		guard let texture = self.makeTexture(descriptor: descriptor) else {
@@ -92,6 +92,20 @@ extension MTLDevice
 			bytesPerImage: (size.x * size.y) * MemoryLayout<Voxel3DTextureRGBAColor>.size
 		)
 		
-		return texture
+		guard let privateTexture = self.makeTexture(descriptor: with(descriptor){ $0.storageMode = .private }) else {
+			return nil
+		}
+		with(self.makeCommandQueue()!){ cq in
+			with(cq.makeCommandBufferWithUnretainedReferences()!){ cb in
+				with(cb.makeBlitCommandEncoder()!){ ce in
+					ce.copy(from: texture, to: privateTexture)
+					ce.endEncoding()
+				}
+				cb.commit()
+				cb.waitUntilCompleted()
+			}
+		}
+		
+		return privateTexture
 	}
 }
