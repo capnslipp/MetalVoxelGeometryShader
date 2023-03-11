@@ -184,6 +184,9 @@ fragment half4 fragmentShader(
 	half colorIntensity = (0.5 + 0.5 * dot(normal, lightDirection)) * lightIntensity + ambientIntensity;
 	colorIntensity = colorIntensity / (1.0 + colorIntensity);
 	
+	// TEMP: Normal-coloring
+	color = half4(normal * 0.5 + 0.5, 1);
+	
 	return half4(
 		color.rgb * colorIntensity,
 		color.a
