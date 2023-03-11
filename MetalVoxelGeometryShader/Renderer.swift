@@ -56,8 +56,8 @@ class Renderer : NSObject, MTKViewDelegate
 		let uniformBufferSize = alignedUniformsSize * maxBuffersInFlight
 		
 		self.dynamicUniformBuffer = self.device.makeBuffer(
-			length:uniformBufferSize,
-			options:[MTLResourceOptions.storageModeShared]
+			length: uniformBufferSize,
+			options: [ .cpuCacheModeWriteCombined, .storageModeShared, ]
 		)!
 		
 		self.dynamicUniformBuffer.label = "UniformBuffer"
