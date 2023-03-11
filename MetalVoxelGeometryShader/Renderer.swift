@@ -276,12 +276,12 @@ class Renderer : NSObject, MTKViewDelegate
 	{
 		/// Per frame updates hare
 
-		_ = inFlightSemaphore.wait(timeout: DispatchTime.distantFuture)
+		_ = self.inFlightSemaphore.wait(timeout: DispatchTime.distantFuture)
 		
-		if let commandBuffer = commandQueue.makeCommandBuffer() {
-			let semaphore = inFlightSemaphore
-			commandBuffer.addCompletedHandler { (_ commandBuffer)-> Swift.Void in
-				semaphore.signal()
+		if let commandBuffer = self.commandQueue.makeCommandBuffer()
+		{
+			commandBuffer.addCompletedHandler { [weak self] _ in
+				self?.inFlightSemaphore.signal()
 			}
 			
 			self.updateDynamicBufferState()
