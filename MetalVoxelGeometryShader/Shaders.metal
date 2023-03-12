@@ -106,6 +106,16 @@ MeshVertexData calculateVertex(uint threadI, uint3 positionInGrid, const object_
 	};
 }
 
+static CONSTANT float4 kCubeVertices[kVertexCountPerCube] = {
+	float4(0, 0, 0, 1),
+	float4(1, 0, 0, 1),
+	float4(0, 1, 0, 1),
+	float4(1, 1, 0, 1),
+	float4(0, 0, 1, 1),
+	float4(1, 0, 1, 1),
+	float4(0, 1, 1, 1),
+	float4(1, 1, 1, 1),
+};
 
 typedef struct {
 	uchar indices[3];
@@ -156,17 +166,32 @@ half3 calculateNormal(int threadI) {
 	return normal;
 }
 
+static CONSTANT half3 kCubeNormals[kPrimitiveCountPerCube] = {
+	half3(-1, 0, 0),
+	half3(-1, 0, 0),
+	half3(1, 0, 0),
+	half3(1, 0, 0),
+	half3(0, -1, 0),
+	half3(0, -1, 0),
+	half3(0, 1, 0),
+	half3(0, 1, 0),
+	half3(0, 0, -1),
+	half3(0, 0, -1),
+	half3(0, 0, 1),
+	half3(0, 0, 1),
+};
+
 MeshPrimitiveData calculatePrimitive(uint threadI, uint3 positionInGrid, const object_data ObjectToMeshPayload& payload) {
 	return (MeshPrimitiveData){
 		/* color: */ payload.color,
-		/* normal: */ calculateNormal(threadI),
+		/* normal: */ kCubeNormals[threadI],
 		/* voxelCoord: */ float3(positionInGrid),
 	};
 }
 
 
 using CubeMesh = metal::mesh<
-	MeshVertexData, // vertex type
+	float4, // vertex type
 	MeshPrimitiveData, // primitive type
 	kVertexCountPerCube, // maximum vertices
 	kPrimitiveCountPerCube, // maximum primitives
@@ -180,7 +205,6 @@ using CubeMesh = metal::mesh<
 void meshShader(
 	CubeMesh outputMesh,
 	const object_data ObjectToMeshPayload *payloads [[payload]],
-	uint threadI [[thread_index_in_threadgroup]],
 	uint3 positionInBlock_cubes [[threadgroup_position_in_grid]]
 ) {
 	uint cubeI = (positionInBlock_cubes.z * kCubesPerBlockX * kCubesPerBlockY) +
@@ -191,21 +215,115 @@ void meshShader(
 	//if (payload.blockPosition_cubes.x >= 64)
 	//	return;
 	
-	if (threadI < kVertexCountPerCube)
-		outputMesh.set_vertex(threadI, calculateVertex(threadI, positionInGrid, payload));
+	float4 position = float4(float3(positionInGrid), 1);
+	outputMesh.set_vertex(0, payload.transform * (position + kCubeVertices[0]));
+	outputMesh.set_vertex(1, payload.transform * (position + kCubeVertices[1]));
+	outputMesh.set_vertex(2, payload.transform * (position + kCubeVertices[2]));
+	outputMesh.set_vertex(3, payload.transform * (position + kCubeVertices[3]));
+	outputMesh.set_vertex(4, payload.transform * (position + kCubeVertices[4]));
+	outputMesh.set_vertex(5, payload.transform * (position + kCubeVertices[5]));
+	outputMesh.set_vertex(6, payload.transform * (position + kCubeVertices[6]));
+	outputMesh.set_vertex(7, payload.transform * (position + kCubeVertices[7]));
 	
-	if (threadI < kPrimitiveCountPerCube) {
+	{
+		uint threadI = 0;
+		MeshTriIndexData triIndices = calculateTriIndices(threadI);
+		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
+		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
+		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
+	}
+	{
+		uint threadI = 1;
+		MeshTriIndexData triIndices = calculateTriIndices(threadI);
+		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
+		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
+		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
+	}
+	{
+		uint threadI = 2;
+		MeshTriIndexData triIndices = calculateTriIndices(threadI);
+		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
+		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
+		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
+	}
+	{
+		uint threadI = 3;
+		MeshTriIndexData triIndices = calculateTriIndices(threadI);
+		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
+		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
+		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
+	}
+	{
+		uint threadI = 4;
+		MeshTriIndexData triIndices = calculateTriIndices(threadI);
+		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
+		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
+		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
+	}
+	{
+		uint threadI = 5;
+		MeshTriIndexData triIndices = calculateTriIndices(threadI);
+		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
+		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
+		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
+	}
+	{
+		uint threadI = 6;
+		MeshTriIndexData triIndices = calculateTriIndices(threadI);
+		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
+		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
+		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
+	}
+	{
+		uint threadI = 7;
+		MeshTriIndexData triIndices = calculateTriIndices(threadI);
+		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
+		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
+		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
+	}
+	{
+		uint threadI = 8;
+		MeshTriIndexData triIndices = calculateTriIndices(threadI);
+		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
+		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
+		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
+	}
+	{
+		uint threadI = 9;
+		MeshTriIndexData triIndices = calculateTriIndices(threadI);
+		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
+		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
+		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
+	}
+	{
+		uint threadI = 10;
+		MeshTriIndexData triIndices = calculateTriIndices(threadI);
+		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
+		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
+		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
+	}
+	{
+		uint threadI = 11;
 		MeshTriIndexData triIndices = calculateTriIndices(threadI);
 		outputMesh.set_index(threadI * 3 + 0, triIndices.indices[0]);
 		outputMesh.set_index(threadI * 3 + 1, triIndices.indices[1]);
 		outputMesh.set_index(threadI * 3 + 2, triIndices.indices[2]);
 	}
 	
-	if (threadI < kPrimitiveCountPerCube)
-		outputMesh.set_primitive(threadI, calculatePrimitive(threadI, positionInGrid, payload));
+	outputMesh.set_primitive(0, calculatePrimitive(0, positionInGrid, payload));
+	outputMesh.set_primitive(1, calculatePrimitive(1, positionInGrid, payload));
+	outputMesh.set_primitive(2, calculatePrimitive(2, positionInGrid, payload));
+	outputMesh.set_primitive(3, calculatePrimitive(3, positionInGrid, payload));
+	outputMesh.set_primitive(4, calculatePrimitive(4, positionInGrid, payload));
+	outputMesh.set_primitive(5, calculatePrimitive(5, positionInGrid, payload));
+	outputMesh.set_primitive(6, calculatePrimitive(6, positionInGrid, payload));
+	outputMesh.set_primitive(7, calculatePrimitive(7, positionInGrid, payload));
+	outputMesh.set_primitive(8, calculatePrimitive(8, positionInGrid, payload));
+	outputMesh.set_primitive(9, calculatePrimitive(9, positionInGrid, payload));
+	outputMesh.set_primitive(10, calculatePrimitive(10, positionInGrid, payload));
+	outputMesh.set_primitive(11, calculatePrimitive(11, positionInGrid, payload));
 	
-	if (threadI == 0)
-		outputMesh.set_primitive_count(kPrimitiveCountPerCube);
+	outputMesh.set_primitive_count(kPrimitiveCountPerCube);
 }
 
 

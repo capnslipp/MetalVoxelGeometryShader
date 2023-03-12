@@ -50,7 +50,7 @@ static CONSTANT uint kPrimitiveCountPerCube = 6 * 2;
 static CONSTANT uint kIndexCountPerCube = kPrimitiveCountPerCube * 3;
 
 static CONSTANT uint kTrianglesPerModel = kPrimitiveCountPerCube;
-static CONSTANT uint kThreadsPerCube = (kVertexCountPerCube > kPrimitiveCountPerCube) ? kVertexCountPerCube : kPrimitiveCountPerCube;
+static CONSTANT uint kThreadsPerCube = 1;
 
 static CONSTANT uint kMaxTotalThreadgroupsPerMeshGrid = 2;
 static CONSTANT uint kMaxTotalThreadsPerObjectThreadgroup = kCubesPerBlock;
