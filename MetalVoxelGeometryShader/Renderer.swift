@@ -75,6 +75,14 @@ class Renderer : NSObject, MTKViewDelegate
 				device: device,
 				metalKitView: metalKitView
 			)
+			print("pipelineState.maxTotalThreadsPerThreadgroup: \(pipelineState.maxTotalThreadsPerThreadgroup)")
+			print("pipelineState.threadgroupSizeMatchesTileSize: \(pipelineState.threadgroupSizeMatchesTileSize)")
+			print("pipelineState.supportIndirectCommandBuffers: \(pipelineState.supportIndirectCommandBuffers)")
+			print("pipelineState.maxTotalThreadgroupsPerMeshGrid: \(pipelineState.maxTotalThreadgroupsPerMeshGrid)")
+			print("pipelineState.maxTotalThreadsPerMeshThreadgroup: \(pipelineState.maxTotalThreadsPerMeshThreadgroup)")
+			print("pipelineState.maxTotalThreadsPerObjectThreadgroup: \(pipelineState.maxTotalThreadsPerObjectThreadgroup)")
+			print("pipelineState.meshThreadExecutionWidth: \(pipelineState.meshThreadExecutionWidth)")
+			print("pipelineState.objectThreadExecutionWidth: \(pipelineState.objectThreadExecutionWidth)")
 		} catch {
 			print("Unable to compile render pipeline state. Error info: \(error)")
 			return nil
@@ -271,15 +279,23 @@ class Renderer : NSObject, MTKViewDelegate
 		uniforms[0].modelViewMatrix = simd_mul(viewMatrix, modelMatrix)
 		rotation += 0.01
 	}
-
+	
+	
+	var _drawCallID = 0
+	
 	func draw(in view: MTKView)
 	{
+		_drawCallID += 1
+		
 		/// Per frame updates hare
 
 		_ = self.inFlightSemaphore.wait(timeout: DispatchTime.distantFuture)
 		
-		if let commandBuffer = self.commandQueue.makeCommandBuffer()
-		{
+		if let commandBuffer = self.commandQueue.makeCommandBuffer(descriptor: with(.init()){
+			$0.errorOptions = .encoderExecutionStatus
+		}) {
+			commandBuffer.label = "Command Buffer for draw #\(_drawCallID)"
+			
 			commandBuffer.addCompletedHandler { [weak self] _ in
 				self?.inFlightSemaphore.signal()
 			}
@@ -296,7 +312,7 @@ class Renderer : NSObject, MTKViewDelegate
 				
 				/// Final pass rendering code here
 				if let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
-					renderEncoder.label = "Primary Render Encoder"
+					renderEncoder.label = "Primary Render Encoder for draw #\(_drawCallID)"
 					
 					renderEncoder.pushDebugGroup("Draw Box")
 					
@@ -361,7 +377,17 @@ class Renderer : NSObject, MTKViewDelegate
 				}
 			}
 			
+			commandBuffer.addCompletedHandler{ commandBuffer in
+				for log in commandBuffer.logs {
+					print(log)
+				}
+			}
+			
 			commandBuffer.commit()
+			
+			if let error = commandBuffer.error as NSError? {
+				print(error)
+			}
 		}
 	}
 
