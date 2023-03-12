@@ -17,6 +17,16 @@ using namespace metal;
 
 
 
+template <typename T>
+METAL_FUNC T lerp(T x, T y, T a) { return mix(x, y, a); }
+
+template <typename T>
+METAL_FUNC T inverse_lerp(T x, T y, T a) {
+	return (a - x) / (y - x);
+}
+
+
+
 // MARK: Mesh Shader - Object Stage
 
 typedef struct {
@@ -177,15 +187,15 @@ fragment half4 fragmentShader(
 	half4 color = in.primitiveData.color;
 	
 	half3 normal = in.primitiveData.normal;
-	half3 lightDirection = normalize(half3(1, 1, 1));
+	half3 lightDirection = normalize(half3(1, 2, 3));
 	
-	half ambientIntensity = 0.0;
-	half lightIntensity = 10.0;
-	half colorIntensity = (0.5 + 0.5 * dot(normal, lightDirection)) * lightIntensity + ambientIntensity;
+	half ambientIntensity = -0.25;
+	half lightIntensity = 5.0;
+	half colorIntensity = inverse_lerp(-1.0h, 1.0h, dot(normal, lightDirection)) * lightIntensity + ambientIntensity;
 	colorIntensity = colorIntensity / (1.0 + colorIntensity);
 	
 	// TEMP: Normal-coloring
-	color = half4(normal * 0.5 + 0.5, 1);
+	//color = half4(inverse_lerp(half3(-1), half3(1), normal), 1);
 	
 	return half4(
 		color.rgb * colorIntensity,
