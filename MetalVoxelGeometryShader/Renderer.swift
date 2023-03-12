@@ -18,7 +18,7 @@ import With
 // The 256 byte aligned size of our uniform structure
 let alignedUniformsSize = (MemoryLayout<Uniforms>.size + 0xFF) & -0x100
 
-let maxBuffersInFlight = 3
+let maxBuffersInFlight = 1
 
 enum RendererError : Error {
 	case badVertexDescriptor
@@ -193,7 +193,8 @@ class Renderer : NSObject, MTKViewDelegate
 			$0.meshFunction = meshFunction
 			let fragmentFunction = library?.makeFunction(name: "fragmentShader")
 			$0.fragmentFunction = fragmentFunction
-			//$0.payloadMemoryLength = kMeshPayloadMemoryLength
+			$0.payloadMemoryLength = kObjectToMeshPayloadMemoryLength
+			//$0.maxTotalThreadgroupsPerMeshGrid = 8
 			//$0.maxTotalThreadsPerObjectThreadgroup = Int(kCubesPerBlock)
 			//$0.maxTotalThreadsPerMeshThreadgroup = Int(kVertexCountPerCube)
 			
@@ -274,7 +275,7 @@ class Renderer : NSObject, MTKViewDelegate
 		let rotationAxis = SIMD3<Float>(1, 1, 0)
 		let modelMatrix = matrix4x4_rotation(radians: rotation, axis: rotationAxis)
 		uniforms[0].modelMatrix = modelMatrix
-		let viewMatrix = matrix4x4_translation(0.0, 0.0, -8.0)
+		let viewMatrix = matrix4x4_translation(0.0, 0.0, -16.0)
 		uniforms[0].viewMatrix = viewMatrix
 		uniforms[0].modelViewMatrix = simd_mul(viewMatrix, modelMatrix)
 		rotation += 0.01
@@ -328,7 +329,7 @@ class Renderer : NSObject, MTKViewDelegate
 					renderEncoder.setObjectBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: 0)
 					//renderEncoder.setMeshTexture(meshTexture, atIndex: 2)
 					//renderEncoder.setVertexBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
-					renderEncoder.setFragmentBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
+					//renderEncoder.setFragmentBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
 					
 					//for (index, element) in mesh.vertexDescriptor.layouts.enumerated() {
 					//	guard let layout = element as? MDLVertexBufferLayout else {
@@ -355,17 +356,24 @@ class Renderer : NSObject, MTKViewDelegate
 					//	)
 					//}
 					
+					renderEncoder.useResource(self.voxelTexture, usage: .read, stages: .object)
 					renderEncoder.setObjectTexture(self.voxelTexture, index: 0)
 					
-					let objectThreads = MTLSize(width: Int(kCubesPerBlockX), height: Int(kCubesPerBlockY), depth: Int(kCubesPerBlockZ))
-					//let objectGroups = MTLSize(
+					// threadgroupsPerGrid: The number of threadgroups in the object (if present) or mesh shader grid.
+					//let objectThreadgroupCount = MTLSize(
 					//	width: self.voxelTexture.width / objectThreads.width,
 					//	height: self.voxelTexture.height / objectThreads.height,
 					//	depth: self.voxelTexture.depth / objectThreads.depth
 					//)
-					let objectGroups = MTLSize(width: 1, height: 1, depth: 1)
-					let meshThreads = MTLSize(width: Int(kThreadsPerCube), height: 1, depth: 1)
-					renderEncoder.drawMeshThreadgroups(objectGroups, threadsPerObjectThreadgroup: objectThreads, threadsPerMeshThreadgroup: meshThreads)
+					let objectThreadgroupCount = MTLSize(width: kMaxTotalThreadgroupsPerMeshGrid)
+					
+					// threadsPerObjectThreadgroup: The number of threads in one object shader threadgroup. Ignored if object shader is not present.
+					let objectThreadCount = MTLSize(kCubesPerBlockXYZ)
+					
+					// threadsPerMeshThreadgroup: The number of threads in one mesh shader threadgroup.
+					let meshThreadCount = MTLSize(width: kThreadsPerCube)
+					
+					renderEncoder.drawMeshThreadgroups(objectThreadgroupCount, threadsPerObjectThreadgroup: objectThreadCount, threadsPerMeshThreadgroup: meshThreadCount)
 					
 					renderEncoder.popDebugGroup()
 					
@@ -396,7 +404,7 @@ class Renderer : NSObject, MTKViewDelegate
 		/// Respond to drawable size or orientation changes here
 		
 		let aspect = Float(size.width) / Float(size.height)
-		projectionMatrix = matrix_perspective_right_hand(fovyRadians: radians_from_degrees(65), aspectRatio:aspect, nearZ: 0.1, farZ: 100.0)
+		projectionMatrix = matrix_perspective_right_hand(fovyRadians: radians_from_degrees(90), aspectRatio:aspect, nearZ: 1.0, farZ: 1000.0)
 	}
 }
 
@@ -438,4 +446,22 @@ func matrix_perspective_right_hand(fovyRadians fovy: Float, aspectRatio: Float, 
 
 func radians_from_degrees(_ degrees: Float) -> Float {
 	return (degrees / 180) * .pi
+}
+
+
+extension MTLSize
+{
+	init(_ width: Int, _ height: Int, _ depth: Int) {
+		self.init(width: width, height: height, depth: depth)
+	}
+	
+	init(_ size: uint3) {
+		self.init(Int(size.x), Int(size.y), Int(size.z))
+	}
+	
+	init(width: uint) {
+		self.init(Int(width), 1, 1)
+	}
+	
+	static let one = MTLSize(1, 1, 1)
 }

@@ -32,29 +32,59 @@ METAL_FUNC T inverse_lerp(T x, T y, T a) {
 typedef struct {
 	half4 color;
 	float4x4 transform;
-} MeshPayload;
-static_assert(kMeshPayloadMemoryLength == sizeof(MeshPayload), "kMeshPayloadMemoryLength must match the size of MeshPayload.");
+	uint3 blockPosition_blocks;
+} ObjectToMeshPayload;
+static_assert(kObjectToMeshPayloadSize == sizeof(ObjectToMeshPayload), "kObjectToMeshPayloadMemoryLength must match the size of MeshPayload.");
 
-[[object, max_total_threads_per_threadgroup(kCubesPerBlock)]]
+[[object,
+	max_total_threadgroups_per_mesh_grid(kMaxTotalThreadgroupsPerMeshGrid),
+	max_total_threads_per_threadgroup(kMaxTotalThreadsPerObjectThreadgroup)
+]]
 void meshObjectShader(
-	object_data MeshPayload *payload [[payload]],
+	object_data ObjectToMeshPayload *payloads [[payload]],
 	constant Uniforms & uniforms [[ buffer(0) ]],
 	//const device void *inputData [[buffer(0)]],
 	const texture3d<half> voxel3DTexture [[ texture(0) ]],
-	uint cubeI [[thread_index_in_threadgroup]],
-	uint3 positionInGrid [[threadgroup_position_in_grid]],
+	uint threadI [[thread_index_in_threadgroup]],
+	uint3 positionInGrid [[thread_position_in_grid]],
+	uint3 blockPosition_blocks [[threadgroup_position_in_grid]],
+	uint threadgroup_size [[threads_per_threadgroup]],
 	mesh_grid_properties meshGridProperties
 ) {
-	if (cubeI < kCubesPerBlock) {
-		constexpr sampler colorSampler(coord::pixel);
-		uint3 voxelIndex = uint3(positionInGrid.x + 39, positionInGrid.y + 19, positionInGrid.z);
-		payload[cubeI].color = voxel3DTexture.sample(colorSampler, float3(voxelIndex));
-		//payload[cubeI].color = voxel3DTexture.read(voxelIndex);
-		payload[cubeI].transform = uniforms.projectionMatrix * uniforms.modelViewMatrix;
-	}
+	//if (blockPosition_blocks.x == 1) return;
 	
-	if (cubeI == 0)
-		meshGridProperties.set_threadgroups_per_grid(uint3(kCubesPerBlockX, kCubesPerBlockY, kCubesPerBlockZ));
+	uint cubeI = threadI;
+	if (cubeI < kCubesPerBlock) {
+		//constexpr sampler colorSampler(coord::pixel);
+		uint3 voxelIndex = uint3(positionInGrid.x + 39, positionInGrid.y + 19, positionInGrid.z);
+		//uint3 voxelIndex = uint3(cubeI + 39, 19, 0);
+		//payload.color = voxel3DTexture.sample(colorSampler, float3(voxelIndex));
+		payloads[cubeI].color = voxel3DTexture.read(voxelIndex);
+		payloads[cubeI].transform = uniforms.projectionMatrix * uniforms.modelViewMatrix;
+		payloads[cubeI].blockPosition_blocks = blockPosition_blocks;
+	}
+	//if (blockPosition_blocks.x == 0)
+	//	payloads[cubeI].color = half4(1, 0, 0, 1);
+	//if (blockPosition_blocks.x == 1)
+	//	payloads[cubeI].color = half4(0, 1, 0, 1);
+	//if (cubeI == 63)
+	//	payload.color = half4(1, 0, 1, 1);
+	//if (cubeI == 64)
+	//	payload.color = half4(1, 1, 1, 1);
+	//if (cubeI == 0) {
+	//	payload.color = half4(
+	//		threadgroup_size % 2,
+	//		threadgroup_size / 2 % 2,
+	//		threadgroup_size / 4 % 2,
+	//		//threadgroup_size / 8 % 2,
+	//		//threadgroup_size / 16 % 2,
+	//		//threadgroup_size / 32 % 2,
+	//		1
+	//	);
+	//}
+	
+	if (threadI == 0)
+		meshGridProperties.set_threadgroups_per_grid(kCubesPerBlockXYZ);
 }
 
 
@@ -65,11 +95,12 @@ typedef struct {
 	float4 position [[position]];
 } MeshVertexData;
 
-MeshVertexData calculateVertex(uint threadI, uint3 positionInGrid) {
+MeshVertexData calculateVertex(uint threadI, uint3 positionInGrid, const object_data ObjectToMeshPayload& payload) {
 	return (MeshVertexData){
-		/* position: */ float4(
+		/* position: */ payload.transform * float4(
 			float3(positionInGrid) +
-				float3(threadI % 2, threadI / 2 % 2, threadI / 4 % 2),
+				float3(0.5) + 
+				(float3(threadI % 2, threadI / 2 % 2, threadI / 4 % 2) - 0.5) * 0.9,
 			1.0
 		),
 	};
@@ -125,7 +156,7 @@ half3 calculateNormal(int threadI) {
 	return normal;
 }
 
-MeshPrimitiveData calculatePrimitive(uint threadI, uint3 positionInGrid, const object_data MeshPayload& payload) {
+MeshPrimitiveData calculatePrimitive(uint threadI, uint3 positionInGrid, const object_data ObjectToMeshPayload& payload) {
 	return (MeshPrimitiveData){
 		/* color: */ payload.color,
 		/* normal: */ calculateNormal(threadI),
@@ -143,18 +174,25 @@ using CubeMesh = metal::mesh<
 >;
 
 
-[[mesh, max_total_threads_per_threadgroup(kThreadsPerCube)]]
+[[mesh,
+	max_total_threads_per_threadgroup(kMaxTotalThreadsPerMeshThreadgroup)
+]]
 void meshShader(
 	CubeMesh outputMesh,
-	const object_data MeshPayload& payload [[payload]],
+	const object_data ObjectToMeshPayload *payloads [[payload]],
 	uint threadI [[thread_index_in_threadgroup]],
-	uint3 positionInGrid [[threadgroup_position_in_grid]]
+	uint3 positionInBlock_cubes [[threadgroup_position_in_grid]]
 ) {
-	if (threadI < kVertexCountPerCube) {
-		MeshVertexData vertexData = calculateVertex(threadI, positionInGrid);
-		vertexData.position = payload.transform * vertexData.position;
-		outputMesh.set_vertex(threadI, vertexData);
-	}
+	uint cubeI = (positionInBlock_cubes.z * kCubesPerBlockX * kCubesPerBlockY) +
+		(positionInBlock_cubes.y * kCubesPerBlockX) +
+		(positionInBlock_cubes.x);
+	const object_data ObjectToMeshPayload & payload = payloads[cubeI];
+	uint3 positionInGrid = (payload.blockPosition_blocks * kCubesPerBlockXYZ) + positionInBlock_cubes;
+	//if (payload.blockPosition_cubes.x >= 64)
+	//	return;
+	
+	if (threadI < kVertexCountPerCube)
+		outputMesh.set_vertex(threadI, calculateVertex(threadI, positionInGrid, payload));
 	
 	if (threadI < kPrimitiveCountPerCube) {
 		MeshTriIndexData triIndices = calculateTriIndices(threadI);
@@ -181,10 +219,11 @@ struct FragmentIn
 };
 
 fragment half4 fragmentShader(
-	FragmentIn in [[stage_in]],
-	constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]]
+	FragmentIn in [[stage_in]]
+	//constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]]
 ) {
 	half4 color = in.primitiveData.color;
+	//color.rgb = abs(half3(in.primitiveData.voxelCoord + 1) / 20);
 	
 	half3 normal = in.primitiveData.normal;
 	half3 lightDirection = normalize(half3(1, 2, 3));

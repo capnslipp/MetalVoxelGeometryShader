@@ -21,32 +21,45 @@
 #endif
 
 #include <simd/simd.h>
+#if defined(__METAL_VERSION__)
+#else
+	#define uint3 simd_uint3
+	#define simd_uint3(x,y,z) (simd_uint3){x,y,z}
+#endif
 
 
 
 #if defined(__METAL_VERSION__)
 	#define CONSTANT constant
 #elif defined(__cplusplus)
-	#define CONSTANT constexpr constant
+	#define CONSTANT constexpr
 #else // C/Obj-C/Swift
 	#define CONSTANT const
 #endif
 
 
 
-static CONSTANT size_t kMeshPayloadMemoryLength = (8 + 8) + (4 * 16);
-
-static CONSTANT uint kCubesPerBlockX = 1;
-static CONSTANT uint kCubesPerBlockY = 1;
-static CONSTANT uint kCubesPerBlockZ = 1;
+static CONSTANT uint kCubesPerBlockX = 4;
+static CONSTANT uint kCubesPerBlockY = 4;
+static CONSTANT uint kCubesPerBlockZ = 4;
+static CONSTANT uint3 kCubesPerBlockXYZ = uint3(kCubesPerBlockX, kCubesPerBlockY, kCubesPerBlockZ);
 static CONSTANT uint kCubesPerBlock = kCubesPerBlockX * kCubesPerBlockY * kCubesPerBlockZ;
 
 static CONSTANT uint kVertexCountPerCube = 8;
-static CONSTANT uint kPrimitiveCountPerCube = 12;//6 * 2;
-//static CONSTANT uint kIndexCountPerCube = kPrimitiveCountPerCube * 3;
+static CONSTANT uint kPrimitiveCountPerCube = 6 * 2;
+static CONSTANT uint kIndexCountPerCube = kPrimitiveCountPerCube * 3;
 
 static CONSTANT uint kTrianglesPerModel = kPrimitiveCountPerCube;
 static CONSTANT uint kThreadsPerCube = (kVertexCountPerCube > kPrimitiveCountPerCube) ? kVertexCountPerCube : kPrimitiveCountPerCube;
+
+static CONSTANT uint kMaxTotalThreadgroupsPerMeshGrid = 2;
+static CONSTANT uint kMaxTotalThreadsPerObjectThreadgroup = kCubesPerBlock;
+static CONSTANT uint kMaxTotalThreadsPerMeshThreadgroup = kThreadsPerCube;
+
+static CONSTANT size_t kObjectToMeshPayloadSize = 8 /* half4 */ + 8 /* padding */ +
+	(4 * 16) /* float4x4 */ +
+	16 /* uint3 */;
+static CONSTANT size_t kObjectToMeshPayloadMemoryLength = kObjectToMeshPayloadSize * kCubesPerBlock;
 
 
 typedef NS_ENUM(EnumBackingType, BufferIndex)
