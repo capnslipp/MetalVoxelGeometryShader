@@ -23,10 +23,27 @@
 #include <simd/simd.h>
 #if defined(__METAL_VERSION__)
 #else
+	#define uchar simd_uchar1
+	#define uchar3 simd_uchar3
 	#define uint3 simd_uint3
+	#define float3 simd_float3
+	#define float4 simd_float4
+	
+	#if defined(TARGET_OS_MAC)
+		#define half3 simd_ushort3
+		#define half4 simd_ushort4
+	#else
+		#define half3 simd_half3
+		#define half4 simd_half4
+	#endif
+	
 	#define simd_uint3(x,y,z) (simd_uint3){x,y,z}
 #endif
 
+
+#if defined(__METAL_VERSION__)
+	#define offsetof(st, m) ((size_t)&(((device st *)0)->m))
+#endif
 
 
 #if defined(__METAL_VERSION__)
@@ -60,6 +77,36 @@ static CONSTANT size_t kObjectToMeshPayloadSize = 8 /* half4 */ + 8 /* padding *
 	(4 * 16) /* float4x4 */ +
 	16 /* uint3 */;
 static CONSTANT size_t kObjectToMeshPayloadMemoryLength = kObjectToMeshPayloadSize * kCubesPerBlock;
+
+
+typedef struct _MeshVertexData_cpu {
+	float4 position;
+} MeshVertexData_cpu;
+static CONSTANT size_t kMeshVertexDataSize = sizeof(MeshVertexData_cpu);
+
+typedef struct _MeshTriIndexData_cpu {
+	uchar indices[3];
+} MeshTriIndexData_cpu;
+
+typedef struct _MeshPrimitiveData_cpu {
+	half4 color;
+	half3 normal;
+	uchar3 voxelCoord;
+} MeshPrimitiveData_cpu;
+static CONSTANT size_t kMeshPrimitiveDataSize = sizeof(MeshPrimitiveData_cpu);
+
+#define align16Size(s) ((s + 0xF) & -0x10)
+
+typedef struct _CubeMesh_cpu {
+	uint index __attribute__((aligned(16)));
+	MeshVertexData_cpu vertices[kVertexCountPerCube] __attribute__((aligned(16)));
+	uint16_t indices[kIndexCountPerCube] __attribute__((aligned(16)));
+	MeshPrimitiveData_cpu primitives[kPrimitiveCountPerCube] __attribute__((aligned(16)));
+} CubeMesh_cpu;
+static CONSTANT size_t kCubeMeshSize = sizeof(CubeMesh_cpu);
+static CONSTANT size_t kCubeMeshOffsetOfVertices = offsetof(CubeMesh_cpu, vertices);
+static CONSTANT size_t kCubeMeshOffsetOfIndicies = offsetof(CubeMesh_cpu, indices);
+static CONSTANT size_t kCubeMeshOffsetOfPrimitives = offsetof(CubeMesh_cpu, primitives);
 
 
 typedef NS_ENUM(EnumBackingType, BufferIndex)

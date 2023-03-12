@@ -27,12 +27,14 @@ enum RendererError : Error {
 class Renderer : NSObject, MTKViewDelegate
 {
 	public let device: MTLDevice
-	let commandQueue: MTLCommandQueue
-	var dynamicUniformBuffer: MTLBuffer
-	var pipelineState: MTLRenderPipelineState
-	var depthState: MTLDepthStencilState
-	var colorMap: MTLTexture
-	var voxelTexture: MTLTexture
+	weak var metalKitView: MTKView!
+	
+	var commandQueue: MTLCommandQueue!
+	var dynamicUniformBuffer: MTLBuffer!
+	var computePipelineState: MTLComputePipelineState?
+	var renderPipelineState: MTLRenderPipelineState?
+	var depthState: MTLDepthStencilState!
+	var voxelTexture: MTLTexture!
 	
 	let inFlightSemaphore = DispatchSemaphore(value: maxBuffersInFlight)
 	
@@ -40,17 +42,44 @@ class Renderer : NSObject, MTKViewDelegate
 	
 	var uniformBufferIndex = 0
 	
-	var uniforms: UnsafeMutablePointer<Uniforms>
+	var uniforms: UnsafeMutablePointer<Uniforms>!
 	
 	var projectionMatrix: matrix_float4x4 = matrix_float4x4()
 	
 	var rotation: Float = 0
 	
-	//var mesh: MTKMesh
+	var meshBuffer: MTLBuffer!
+	var DEBUG_computeOutTexture: MTLTexture!
 	
 	init?(metalKitView: MTKView)
 	{
+		func printStructInfo<StructT>(_ structT: StructT.Type) {
+			print("\(StructT.self):")
+			print(indent: 1, "size: \(MemoryLayout<StructT>.size)")
+			print(indent: 1, "alignment: \(MemoryLayout<StructT>.alignment)")
+			print(indent: 1, "stride: \(MemoryLayout<StructT>.stride)")
+		}
+		printStructInfo(MeshVertexData_cpu.self)
+		print("kMeshVertexDataSize: \(kMeshVertexDataSize)")
+		print("")
+		printStructInfo(MeshPrimitiveData_cpu.self)
+		print("kMeshPrimitiveDataSize: \(kMeshPrimitiveDataSize)")
+		print("")
+		printStructInfo(CubeMesh_cpu.self)
+		print("kCubeMeshSize: \(kCubeMeshSize)")
+		print("")
+		print("CubeMesh_cpu.vertices align: \(MemoryLayout<CubeMesh_cpu>.offset(of: \.vertices)!)")
+		print("kCubeMeshOffsetOfVertices: \(kCubeMeshOffsetOfVertices)")
+		print("CubeMesh_cpu.indices align: \(MemoryLayout<CubeMesh_cpu>.offset(of: \.indices)!)")
+		print("kCubeMeshOffsetOfIndicies: \(kCubeMeshOffsetOfIndicies)")
+		print("CubeMesh_cpu.primitives align: \(MemoryLayout<CubeMesh_cpu>.offset(of: \.primitives)!)")
+		print("kCubeMeshOffsetOfPrimitives: \(kCubeMeshOffsetOfPrimitives)")
+		
+		self.metalKitView = metalKitView
 		self.device = metalKitView.device!
+		
+		super.init()
+		
 		self.commandQueue = self.device.makeCommandQueue()!
 		
 		let uniformBufferSize = alignedUniformsSize * maxBuffersInFlight
@@ -60,29 +89,25 @@ class Renderer : NSObject, MTKViewDelegate
 			options: [ .cpuCacheModeWriteCombined, .storageModeShared, ]
 		)!
 		
-		self.dynamicUniformBuffer.label = "UniformBuffer"
+		self.dynamicUniformBuffer.label = "Uniform Buffer"
 		
-		uniforms = UnsafeMutableRawPointer(dynamicUniformBuffer.contents()).bindMemory(to:Uniforms.self, capacity:1)
+		self.uniforms = UnsafeMutableRawPointer(self.dynamicUniformBuffer.contents()).bindMemory(to: Uniforms.self, capacity:1)
 		
 		metalKitView.depthStencilPixelFormat = MTLPixelFormat.depth32Float_stencil8
 		metalKitView.colorPixelFormat = MTLPixelFormat.bgra8Unorm_srgb
 		metalKitView.sampleCount = 1
 		
-		//let mtlVertexDescriptor = Renderer.buildMetalVertexDescriptor()
+		let mtlVertexDescriptor = buildMetalVertexDescriptor()
 		
 		do {
-			pipelineState = try Renderer.buildMeshRenderPipelineWithDevice(
-				device: device,
-				metalKitView: metalKitView
-			)
-			print("pipelineState.maxTotalThreadsPerThreadgroup: \(pipelineState.maxTotalThreadsPerThreadgroup)")
-			print("pipelineState.threadgroupSizeMatchesTileSize: \(pipelineState.threadgroupSizeMatchesTileSize)")
-			print("pipelineState.supportIndirectCommandBuffers: \(pipelineState.supportIndirectCommandBuffers)")
-			print("pipelineState.maxTotalThreadgroupsPerMeshGrid: \(pipelineState.maxTotalThreadgroupsPerMeshGrid)")
-			print("pipelineState.maxTotalThreadsPerMeshThreadgroup: \(pipelineState.maxTotalThreadsPerMeshThreadgroup)")
-			print("pipelineState.maxTotalThreadsPerObjectThreadgroup: \(pipelineState.maxTotalThreadsPerObjectThreadgroup)")
-			print("pipelineState.meshThreadExecutionWidth: \(pipelineState.meshThreadExecutionWidth)")
-			print("pipelineState.objectThreadExecutionWidth: \(pipelineState.objectThreadExecutionWidth)")
+			computePipelineState = try buildComputePipelineWithDevice()
+		} catch {
+			print("Unable to compile compute pipeline state. Error info: \(error)")
+			return nil
+		}
+		
+		do {
+			renderPipelineState = try buildRenderPipelineWithDevice()
 		} catch {
 			print("Unable to compile render pipeline state. Error info: \(error)")
 			return nil
@@ -92,20 +117,6 @@ class Renderer : NSObject, MTKViewDelegate
 		depthStateDescriptor.depthCompareFunction = MTLCompareFunction.less
 		depthStateDescriptor.isDepthWriteEnabled = true
 		self.depthState = device.makeDepthStencilState(descriptor:depthStateDescriptor)!
-		
-		//do {
-		//	mesh = try Renderer.buildMesh(device: device, mtlVertexDescriptor: mtlVertexDescriptor)
-		//} catch {
-		//	print("Unable to build MetalKit Mesh. Error info: \(error)")
-		//	return nil
-		//}
-		
-		do {
-			colorMap = try Renderer.loadTexture(device: device, textureName: "ColorMap")
-		} catch {
-			print("Unable to load texture. Error info: \(error)")
-			return nil
-		}
 		
 		do {
 			let path = Bundle.main.path(forResource: "master.Brownstone.NSide", ofType: "vox")!
@@ -121,10 +132,29 @@ class Renderer : NSObject, MTKViewDelegate
 			return nil
 		}
 		
-		super.init()
+		do {
+			self.meshBuffer = try buildComputeMeshBuffer(mtlVertexDescriptor: mtlVertexDescriptor)
+			
+			let size = MTLSize(kCubesPerBlockXYZ)
+			self.DEBUG_computeOutTexture = device.makeTexture(descriptor: with(.textureBufferDescriptor(
+				with: .rgba32Uint,
+				width: size.width,
+				usage: .shaderWrite
+			)){
+				$0.textureType = .type3D
+				$0.width = size.width
+				$0.height = size.height
+				$0.depth = size.depth
+				
+				$0.storageMode = .private
+			})!
+		} catch {
+			print("Unable to build MetalKit Mesh. Error info: \(error)")
+			return nil
+		}
 	}
 
-	class func buildMetalVertexDescriptor() -> MTLVertexDescriptor
+	func buildMetalVertexDescriptor() -> MTLVertexDescriptor
 	{
 		// Create a Metal vertex descriptor specifying how vertices will by laid out for input into our render
 		//	 pipeline and how we'll layout our Model IO vertices
@@ -150,109 +180,84 @@ class Renderer : NSObject, MTKViewDelegate
 		return mtlVertexDescriptor
 	}
 
-	class func buildRenderPipelineWithDevice(
-		device: MTLDevice,
-		metalKitView: MTKView,
-		mtlVertexDescriptor: MTLVertexDescriptor
-	) throws -> MTLRenderPipelineState {
-		/// Build a render state pipeline object
-
-		let library = device.makeDefaultLibrary()
-
-		let vertexFunction = library?.makeFunction(name: "vertexShader")
-		let fragmentFunction = library?.makeFunction(name: "fragmentShader")
-
-		let pipelineDescriptor = MTLRenderPipelineDescriptor()
-		pipelineDescriptor.label = "RenderPipeline"
-		pipelineDescriptor.rasterSampleCount = metalKitView.sampleCount
-		pipelineDescriptor.vertexFunction = vertexFunction
-		pipelineDescriptor.fragmentFunction = fragmentFunction
-		pipelineDescriptor.vertexDescriptor = mtlVertexDescriptor
-
-		pipelineDescriptor.colorAttachments[0].pixelFormat = metalKitView.colorPixelFormat
-		pipelineDescriptor.depthAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
-		pipelineDescriptor.stencilAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
-
-		return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
-	}
-
-	class func buildMeshRenderPipelineWithDevice(
-		device: MTLDevice,
-		metalKitView: MTKView
-	) throws -> MTLRenderPipelineState
+	func buildComputePipelineWithDevice() throws -> MTLComputePipelineState
 	{
-		let meshPipelineDescriptor = with(MTLMeshRenderPipelineDescriptor()) {
-			$0.label = "MeshRenderPipeline"
-			$0.rasterSampleCount = metalKitView.sampleCount
-			
-			let library = device.makeDefaultLibrary()
-			
-			let meshObjectFunction = library?.makeFunction(name: "meshObjectShader")
-			$0.objectFunction = meshObjectFunction
-			let meshFunction = library?.makeFunction(name: "meshShader")
-			$0.meshFunction = meshFunction
-			let fragmentFunction = library?.makeFunction(name: "fragmentShader")
-			$0.fragmentFunction = fragmentFunction
-			$0.payloadMemoryLength = kObjectToMeshPayloadMemoryLength
-			//$0.maxTotalThreadgroupsPerMeshGrid = 8
-			//$0.maxTotalThreadsPerObjectThreadgroup = Int(kCubesPerBlock)
-			//$0.maxTotalThreadsPerMeshThreadgroup = Int(kVertexCountPerCube)
-			
-			$0.colorAttachments[0].pixelFormat = metalKitView.colorPixelFormat
-			$0.depthAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
-			$0.stencilAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
+		let (state, _) = try self.device.makeComputePipelineState(
+			descriptor: with(.init()){
+				$0.label = "Mesh-Generation Compute Pipeline"
+				
+				let library = self.device.makeDefaultLibrary()!
+				
+				let function = library.makeFunction(name: "meshGenerationKernel")
+				$0.computeFunction = function
+				
+				//$0.threadGroupSizeIsMultipleOfThreadExecutionWidth = true
+				$0.maxTotalThreadsPerThreadgroup = Int(kCubesPerBlock);
+				//$0.maxCallStackDepth = 1
+				//$0.supportIndirectCommandBuffers = true
+				
+				//$0.stageInputDescriptor = with(.init()){
+				//	$0.attributes[0] = 
+				//	$0.layouts[0] = 
+				//}
+				
+				//$0.buffers[0].mutability = .mutable
+			},
+			options: []
+		)
+		with(state){
+			print("compute pipeline state:")
+			print(indent: 1, "maxTotalThreadsPerThreadgroup: \($0.maxTotalThreadsPerThreadgroup)")
+			print(indent: 1, "threadExecutionWidth: \($0.threadExecutionWidth)")
+			print(indent: 1, "staticThreadgroupMemoryLength: \($0.staticThreadgroupMemoryLength)")
+			print(indent: 1, "supportIndirectCommandBuffers: \($0.supportIndirectCommandBuffers)")
 		}
-		
-		let (state, _) = try device.makeRenderPipelineState(descriptor: meshPipelineDescriptor, options: [])
 		return state
 	}
 
-	class func buildMesh(
-		device: MTLDevice,
-		mtlVertexDescriptor: MTLVertexDescriptor
-	) throws -> MTKMesh {
-		/// Create and condition mesh data to feed into a pipeline using the given vertex descriptor
-
-		let metalAllocator = MTKMeshBufferAllocator(device: device)
-
-		let mdlMesh = MDLMesh.newBox(
-			withDimensions: SIMD3<Float>(4, 4, 4),
-			segments: SIMD3<UInt32>(2, 2, 2),
-			geometryType: MDLGeometryType.triangles,
-			inwardNormals:false,
-			allocator: metalAllocator
+	func buildRenderPipelineWithDevice() throws -> MTLRenderPipelineState
+	{
+		let (state, _) = try self.device.makeRenderPipelineState(
+			descriptor: with(.init()) {
+				$0.label = "RenderPipeline"
+				$0.rasterSampleCount = metalKitView.sampleCount
+				
+				let library = self.device.makeDefaultLibrary()!
+				
+				let vertexFunction = library.makeFunction(name: "vertexShader")
+				$0.vertexFunction = vertexFunction
+				let fragmentFunction = library.makeFunction(name: "fragmentShader")
+				$0.fragmentFunction = fragmentFunction
+				
+				$0.colorAttachments[0].pixelFormat = metalKitView.colorPixelFormat
+				$0.depthAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
+				$0.stencilAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
+			},
+			options: []
 		)
-		
-		let mdlVertexDescriptor = MTKModelIOVertexDescriptorFromMetal(mtlVertexDescriptor)
-		
-		guard let attributes = mdlVertexDescriptor.attributes as? [MDLVertexAttribute] else {
-			throw RendererError.badVertexDescriptor
+		with(state){
+			print("render pipeline state:")
+			print(indent: 1, "maxTotalThreadsPerThreadgroup: \($0.maxTotalThreadsPerThreadgroup)")
+			print(indent: 1, "threadgroupSizeMatchesTileSize: \($0.threadgroupSizeMatchesTileSize)")
+			print(indent: 1, "supportIndirectCommandBuffers: \($0.supportIndirectCommandBuffers)")
+			print(indent: 1, "maxTotalThreadgroupsPerMeshGrid: \($0.maxTotalThreadgroupsPerMeshGrid)")
+			print(indent: 1, "maxTotalThreadsPerMeshThreadgroup: \($0.maxTotalThreadsPerMeshThreadgroup)")
+			print(indent: 1, "maxTotalThreadsPerObjectThreadgroup: \($0.maxTotalThreadsPerObjectThreadgroup)")
+			print(indent: 1, "meshThreadExecutionWidth: \($0.meshThreadExecutionWidth)")
+			print(indent: 1, "objectThreadExecutionWidth: \($0.objectThreadExecutionWidth)")
 		}
-		attributes[VertexAttribute.position.rawValue].name = MDLVertexAttributePosition
-		attributes[VertexAttribute.texcoord.rawValue].name = MDLVertexAttributeTextureCoordinate
-		
-		mdlMesh.vertexDescriptor = mdlVertexDescriptor
-		
-		return try MTKMesh(mesh:mdlMesh, device:device)
+		return state
 	}
 
-	class func loadTexture(device: MTLDevice,
-						   textureName: String) throws -> MTLTexture {
-		/// Load texture data with optimal parameters for sampling
-
-		let textureLoader = MTKTextureLoader(device: device)
-
-		let textureLoaderOptions = [
-			MTKTextureLoader.Option.textureUsage: NSNumber(value: MTLTextureUsage.shaderRead.rawValue),
-			MTKTextureLoader.Option.textureStorageMode: NSNumber(value: MTLStorageMode.`private`.rawValue)
-		]
-
-		return try textureLoader.newTexture(
-			name: textureName,
-			scaleFactor: 1.0,
-			bundle: nil,
-			options: textureLoaderOptions
-		)
+	func buildComputeMeshBuffer(mtlVertexDescriptor: MTLVertexDescriptor) throws -> MTLBuffer {
+		let voxelSize = self.voxelTexture.size
+		let voxelCount = voxelSize.width * voxelSize.height * voxelSize.depth
+		let buffer = device.makeBuffer(
+			length: kCubeMeshSize * voxelCount,
+			options: [ .storageModePrivate ]
+		)!
+		buffer.label = "Generated Mesh Buffer"
+		return buffer
 	}
 
 	private func updateDynamicBufferState()
@@ -309,10 +314,45 @@ class Renderer : NSObject, MTKViewDelegate
 			///	  holding onto the drawable and blocking the display pipeline any longer than necessary
 			let renderPassDescriptor = view.currentRenderPassDescriptor
 			
-			if let renderPassDescriptor = renderPassDescriptor {
+			if let renderPassDescriptor = renderPassDescriptor
+			{
+				if let computePipelineState, let computeEncoder = commandBuffer.makeComputeCommandEncoder() {
+					computeEncoder.label = "Primary Compute Encoder for draw #\(_drawCallID)"
+					
+					computeEncoder.setComputePipelineState(computePipelineState)
+					
+					computeEncoder.setBuffer(dynamicUniformBuffer, offset: uniformBufferOffset, index: 0)
+					
+					//computeEncoder.useResource(self.voxelTexture, usage: .read)
+					computeEncoder.setTexture(self.voxelTexture, index: 0)
+					
+					//computeEncoder.useResource(self.meshBuffer, usage: .write)
+					computeEncoder.setBuffer(self.meshBuffer, offset: 0, index: 1)
+					
+					computeEncoder.setTexture(self.DEBUG_computeOutTexture, index: 1)
+					
+					// threadgroupsPerGrid: The number of threadgroups in the object (if present) or mesh shader grid.
+					//let objectThreadgroupCount = MTLSize(
+					//	width: self.voxelTexture.width / objectThreads.width,
+					//	height: self.voxelTexture.height / objectThreads.height,
+					//	depth: self.voxelTexture.depth / objectThreads.depth
+					//)
+					//let objectThreadgroupCount = MTLSize(width: kMaxTotalThreadgroupsPerMeshGrid)
+					
+					// threadsPerObjectThreadgroup: The number of threads in one object shader threadgroup. Ignored if object shader is not present.
+					//let objectThreadCount = 
+					
+					// threadsPerMeshThreadgroup: The number of threads in one mesh shader threadgroup.
+					//let meshThreadCount = MTLSize(width: kThreadsPerCube)
+					
+					//renderEncoder.drawMeshThreadgroups(objectThreadgroupCount, threadsPerObjectThreadgroup: objectThreadCount, threadsPerMeshThreadgroup: meshThreadCount)
+					computeEncoder.dispatchThreads(self.voxelTexture.size, threadsPerThreadgroup: MTLSize(kCubesPerBlockXYZ))
+					
+					computeEncoder.endEncoding()
+				}
 				
 				/// Final pass rendering code here
-				if let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
+				if let renderPipelineState, let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
 					renderEncoder.label = "Primary Render Encoder for draw #\(_drawCallID)"
 					
 					renderEncoder.pushDebugGroup("Draw Box")
@@ -321,7 +361,7 @@ class Renderer : NSObject, MTKViewDelegate
 					
 					renderEncoder.setFrontFacing(.counterClockwise)
 					
-					renderEncoder.setRenderPipelineState(pipelineState)
+					renderEncoder.setRenderPipelineState(renderPipelineState)
 					
 					renderEncoder.setDepthStencilState(depthState)
 					
@@ -342,8 +382,6 @@ class Renderer : NSObject, MTKViewDelegate
 					//	}
 					//}
 					
-					//renderEncoder.setFragmentTexture(colorMap, index: TextureIndex.color.rawValue)
-					
 					//renderEncoder.setFragmentTexture(self.voxelTexture, index: TextureIndex.voxel3DColor.rawValue)
 					
 					//for submesh in mesh.submeshes {
@@ -355,25 +393,6 @@ class Renderer : NSObject, MTKViewDelegate
 					//		indexBufferOffset: submesh.indexBuffer.offset
 					//	)
 					//}
-					
-					renderEncoder.useResource(self.voxelTexture, usage: .read, stages: .object)
-					renderEncoder.setObjectTexture(self.voxelTexture, index: 0)
-					
-					// threadgroupsPerGrid: The number of threadgroups in the object (if present) or mesh shader grid.
-					//let objectThreadgroupCount = MTLSize(
-					//	width: self.voxelTexture.width / objectThreads.width,
-					//	height: self.voxelTexture.height / objectThreads.height,
-					//	depth: self.voxelTexture.depth / objectThreads.depth
-					//)
-					let objectThreadgroupCount = MTLSize(width: kMaxTotalThreadgroupsPerMeshGrid)
-					
-					// threadsPerObjectThreadgroup: The number of threads in one object shader threadgroup. Ignored if object shader is not present.
-					let objectThreadCount = MTLSize(kCubesPerBlockXYZ)
-					
-					// threadsPerMeshThreadgroup: The number of threads in one mesh shader threadgroup.
-					let meshThreadCount = MTLSize(width: kThreadsPerCube)
-					
-					renderEncoder.drawMeshThreadgroups(objectThreadgroupCount, threadsPerObjectThreadgroup: objectThreadCount, threadsPerMeshThreadgroup: meshThreadCount)
 					
 					renderEncoder.popDebugGroup()
 					
@@ -464,4 +483,23 @@ extension MTLSize
 	}
 	
 	static let one = MTLSize(1, 1, 1)
+}
+
+
+extension MTLTexture
+{
+	var size: MTLSize { MTLSize(width: self.width, height: self.height, depth: self.depth) }
+}
+
+
+
+func print(
+	indent indentSize: Int,
+	_ items: Any...,
+	separator: String = " ",
+	terminator: String = "\n"
+) {
+	let indent = repeatElement("\t", count: indentSize).joined()
+	let string = items.map{ "\($0)" }.joined(separator: separator)
+	Swift.print(indent + string, separator: "", terminator: terminator)
 }
