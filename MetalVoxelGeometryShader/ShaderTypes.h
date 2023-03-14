@@ -56,9 +56,10 @@
 
 
 
-static CONSTANT uint kCubesPerBlockX = 4;
-static CONSTANT uint kCubesPerBlockY = 4;
-static CONSTANT uint kCubesPerBlockZ = 4;
+// Optimized for maxTotalThreadsPerThreadgroup: 896, threadExecutionWidth: 16
+static CONSTANT uint kCubesPerBlockX = 8;
+static CONSTANT uint kCubesPerBlockY = 7;
+static CONSTANT uint kCubesPerBlockZ = 16;
 static CONSTANT uint3 kCubesPerBlockXYZ = uint3(kCubesPerBlockX, kCubesPerBlockY, kCubesPerBlockZ);
 static CONSTANT uint kCubesPerBlock = kCubesPerBlockX * kCubesPerBlockY * kCubesPerBlockZ;
 

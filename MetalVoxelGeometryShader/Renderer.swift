@@ -191,7 +191,7 @@ class Renderer : NSObject, MTKViewDelegate
 				let function = library.makeFunction(name: "meshGenerationKernel")
 				$0.computeFunction = function
 				
-				//$0.threadGroupSizeIsMultipleOfThreadExecutionWidth = true
+				$0.threadGroupSizeIsMultipleOfThreadExecutionWidth = true
 				$0.maxTotalThreadsPerThreadgroup = Int(kCubesPerBlock);
 				//$0.maxCallStackDepth = 1
 				//$0.supportIndirectCommandBuffers = true
