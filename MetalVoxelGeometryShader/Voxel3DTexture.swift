@@ -51,7 +51,7 @@ extension MTLDevice
 		let size = withMap(model.voxelDimensions){ MTLSize(width: Int($0.x), height: Int($0.y), depth: Int($0.z)) }
 		
 		let descriptor = with(MTLTextureDescriptor.textureBufferDescriptor(
-			with: .rgba8Unorm,
+			with: .rgba8Uint,
 			width: size.x,
 			usage: .shaderRead
 		)){ d in

@@ -48,7 +48,9 @@ class Renderer : NSObject, MTKViewDelegate
 	
 	var rotation: Float = 0
 	
-	var meshBuffer: MTLBuffer!
+	var meshVerticesBuffer: MTLBuffer!
+	var meshIndicesBuffer: MTLBuffer!
+	
 	var DEBUG_computeOutTexture: MTLTexture!
 	
 	init?(metalKitView: MTKView)
@@ -65,15 +67,15 @@ class Renderer : NSObject, MTKViewDelegate
 		printStructInfo(MeshPrimitiveData_cpu.self)
 		print("kMeshPrimitiveDataSize: \(kMeshPrimitiveDataSize)")
 		print("")
-		printStructInfo(CubeMesh_cpu.self)
-		print("kCubeMeshSize: \(kCubeMeshSize)")
-		print("")
-		print("CubeMesh_cpu.vertices align: \(MemoryLayout<CubeMesh_cpu>.offset(of: \.vertices)!)")
-		print("kCubeMeshOffsetOfVertices: \(kCubeMeshOffsetOfVertices)")
-		print("CubeMesh_cpu.indices align: \(MemoryLayout<CubeMesh_cpu>.offset(of: \.indices)!)")
-		print("kCubeMeshOffsetOfIndicies: \(kCubeMeshOffsetOfIndicies)")
-		print("CubeMesh_cpu.primitives align: \(MemoryLayout<CubeMesh_cpu>.offset(of: \.primitives)!)")
-		print("kCubeMeshOffsetOfPrimitives: \(kCubeMeshOffsetOfPrimitives)")
+		//printStructInfo(CubeMesh_cpu.self)
+		//print("kCubeMeshSize: \(kCubeMeshSize)")
+		//print("")
+		//print("CubeMesh_cpu.vertices align: \(MemoryLayout<CubeMesh_cpu>.offset(of: \.vertices)!)")
+		//print("kCubeMeshOffsetOfVertices: \(kCubeMeshOffsetOfVertices)")
+		//print("CubeMesh_cpu.indices align: \(MemoryLayout<CubeMesh_cpu>.offset(of: \.indices)!)")
+		//print("kCubeMeshOffsetOfIndicies: \(kCubeMeshOffsetOfIndicies)")
+		//print("CubeMesh_cpu.primitives align: \(MemoryLayout<CubeMesh_cpu>.offset(of: \.primitives)!)")
+		//print("kCubeMeshOffsetOfPrimitives: \(kCubeMeshOffsetOfPrimitives)")
 		
 		self.metalKitView = metalKitView
 		self.device = metalKitView.device!
@@ -97,26 +99,7 @@ class Renderer : NSObject, MTKViewDelegate
 		metalKitView.colorPixelFormat = MTLPixelFormat.bgra8Unorm_srgb
 		metalKitView.sampleCount = 1
 		
-		let mtlVertexDescriptor = buildMetalVertexDescriptor()
-		
-		do {
-			computePipelineState = try buildComputePipelineWithDevice()
-		} catch {
-			print("Unable to compile compute pipeline state. Error info: \(error)")
-			return nil
-		}
-		
-		do {
-			renderPipelineState = try buildRenderPipelineWithDevice()
-		} catch {
-			print("Unable to compile render pipeline state. Error info: \(error)")
-			return nil
-		}
-		
-		let depthStateDescriptor = MTLDepthStencilDescriptor()
-		depthStateDescriptor.depthCompareFunction = MTLCompareFunction.less
-		depthStateDescriptor.isDepthWriteEnabled = true
-		self.depthState = device.makeDepthStencilState(descriptor:depthStateDescriptor)!
+		//let mtlVertexDescriptor = buildMetalVertexDescriptor()
 		
 		do {
 			let path = Bundle.main.path(forResource: "master.Brownstone.NSide", ofType: "vox")!
@@ -133,7 +116,7 @@ class Renderer : NSObject, MTKViewDelegate
 		}
 		
 		do {
-			self.meshBuffer = try buildComputeMeshBuffer(mtlVertexDescriptor: mtlVertexDescriptor)
+			(self.meshVerticesBuffer, self.meshIndicesBuffer, _) = try buildComputeMeshBuffer()
 			
 			let size = MTLSize(kCubesPerBlockXYZ)
 			self.DEBUG_computeOutTexture = device.makeTexture(descriptor: with(.textureBufferDescriptor(
@@ -152,32 +135,25 @@ class Renderer : NSObject, MTKViewDelegate
 			print("Unable to build MetalKit Mesh. Error info: \(error)")
 			return nil
 		}
-	}
-
-	func buildMetalVertexDescriptor() -> MTLVertexDescriptor
-	{
-		// Create a Metal vertex descriptor specifying how vertices will by laid out for input into our render
-		//	 pipeline and how we'll layout our Model IO vertices
-
-		let mtlVertexDescriptor = MTLVertexDescriptor()
-
-		mtlVertexDescriptor.attributes[VertexAttribute.position.rawValue].format = MTLVertexFormat.float3
-		mtlVertexDescriptor.attributes[VertexAttribute.position.rawValue].offset = 0
-		mtlVertexDescriptor.attributes[VertexAttribute.position.rawValue].bufferIndex = BufferIndex.meshPositions.rawValue
-
-		mtlVertexDescriptor.attributes[VertexAttribute.texcoord.rawValue].format = MTLVertexFormat.float2
-		mtlVertexDescriptor.attributes[VertexAttribute.texcoord.rawValue].offset = 0
-		mtlVertexDescriptor.attributes[VertexAttribute.texcoord.rawValue].bufferIndex = BufferIndex.meshGenerics.rawValue
-
-		mtlVertexDescriptor.layouts[BufferIndex.meshPositions.rawValue].stride = 12
-		mtlVertexDescriptor.layouts[BufferIndex.meshPositions.rawValue].stepRate = 1
-		mtlVertexDescriptor.layouts[BufferIndex.meshPositions.rawValue].stepFunction = MTLVertexStepFunction.perVertex
-
-		mtlVertexDescriptor.layouts[BufferIndex.meshGenerics.rawValue].stride = 8
-		mtlVertexDescriptor.layouts[BufferIndex.meshGenerics.rawValue].stepRate = 1
-		mtlVertexDescriptor.layouts[BufferIndex.meshGenerics.rawValue].stepFunction = MTLVertexStepFunction.perVertex
-
-		return mtlVertexDescriptor
+		
+		let depthStateDescriptor = MTLDepthStencilDescriptor()
+		depthStateDescriptor.depthCompareFunction = MTLCompareFunction.less
+		depthStateDescriptor.isDepthWriteEnabled = true
+		self.depthState = device.makeDepthStencilState(descriptor:depthStateDescriptor)!
+		
+		do {
+			computePipelineState = try buildComputePipelineWithDevice()
+		} catch {
+			print("Unable to compile compute pipeline state. Error info: \(error)")
+			return nil
+		}
+		
+		do {
+			renderPipelineState = try buildRenderPipelineWithDevice()
+		} catch {
+			print("Unable to compile render pipeline state. Error info: \(error)")
+			return nil
+		}
 	}
 
 	func buildComputePipelineWithDevice() throws -> MTLComputePipelineState
@@ -249,15 +225,43 @@ class Renderer : NSObject, MTKViewDelegate
 		return state
 	}
 
-	func buildComputeMeshBuffer(mtlVertexDescriptor: MTLVertexDescriptor) throws -> MTLBuffer {
+	func buildComputeMeshBuffer() throws -> (MTLBuffer, MTLBuffer, MTLVertexDescriptor) {
 		let voxelSize = self.voxelTexture.size
 		let voxelCount = voxelSize.width * voxelSize.height * voxelSize.depth
-		let buffer = device.makeBuffer(
-			length: kCubeMeshSize * voxelCount,
+		
+		let verticesBuffer = with(device.makeBuffer(
+			length: voxelCount * Int(kVertexCountPerCube) * kMeshVertexDataSize,
 			options: [ .storageModePrivate ]
-		)!
-		buffer.label = "Generated Mesh Buffer"
-		return buffer
+		)!){
+			$0.label = "Generated Mesh Vertices Buffer"
+		}
+		
+		let indicesBuffer = with(device.makeBuffer(
+			length: voxelCount * Int(kVertexCountPerCube) * MemoryLayout<UInt32>.size,
+			options: [ .storageModePrivate ]
+		)!){
+			$0.label = "Generated Mesh Indices Buffer"
+		}
+		
+		let vertexDescriptor = with(MTLVertexDescriptor()){
+			$0.attributes[0].format = MTLVertexFormat.float3
+			$0.attributes[0].offset = 0
+			$0.attributes[0].bufferIndex = BufferIndex.meshPositions.rawValue
+			
+			$0.attributes[VertexAttribute.texcoord.rawValue].format = MTLVertexFormat.float2
+			$0.attributes[VertexAttribute.texcoord.rawValue].offset = 0
+			$0.attributes[VertexAttribute.texcoord.rawValue].bufferIndex = BufferIndex.meshGenerics.rawValue
+			
+			$0.layouts[BufferIndex.meshPositions.rawValue].stride = 12
+			$0.layouts[BufferIndex.meshPositions.rawValue].stepRate = 1
+			$0.layouts[BufferIndex.meshPositions.rawValue].stepFunction = MTLVertexStepFunction.perVertex
+			
+			$0.layouts[BufferIndex.meshGenerics.rawValue].stride = 8
+			$0.layouts[BufferIndex.meshGenerics.rawValue].stepRate = 1
+			$0.layouts[BufferIndex.meshGenerics.rawValue].stepFunction = MTLVertexStepFunction.perVertex
+		}
+		
+		return (verticesBuffer, indicesBuffer, vertexDescriptor)
 	}
 
 	private func updateDynamicBufferState()
@@ -321,15 +325,14 @@ class Renderer : NSObject, MTKViewDelegate
 					
 					computeEncoder.setComputePipelineState(computePipelineState)
 					
-					computeEncoder.setBuffer(dynamicUniformBuffer, offset: uniformBufferOffset, index: 0)
-					
 					//computeEncoder.useResource(self.voxelTexture, usage: .read)
 					computeEncoder.setTexture(self.voxelTexture, index: 0)
+					//computeEncoder.setTexture(self.DEBUG_computeOutTexture, index: 1)
 					
-					//computeEncoder.useResource(self.meshBuffer, usage: .write)
-					computeEncoder.setBuffer(self.meshBuffer, offset: 0, index: 1)
+					//computeEncoder.useResource(self.meshVerticesBuffer, usage: .write)
+					computeEncoder.setBuffer(self.meshVerticesBuffer, offset: 0, index: 1)
+					computeEncoder.setBuffer(self.meshIndicesBuffer, offset: 0, index: 2)
 					
-					computeEncoder.setTexture(self.DEBUG_computeOutTexture, index: 1)
 					
 					// threadgroupsPerGrid: The number of threadgroups in the object (if present) or mesh shader grid.
 					//let objectThreadgroupCount = MTLSize(
@@ -366,7 +369,7 @@ class Renderer : NSObject, MTKViewDelegate
 					renderEncoder.setDepthStencilState(depthState)
 					
 					//renderEncoder.setObjectBuffer(objectBuffer, offset: 0, index: 0)
-					renderEncoder.setObjectBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: 0)
+					renderEncoder.setVertexBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: 0)
 					//renderEncoder.setMeshTexture(meshTexture, atIndex: 2)
 					//renderEncoder.setVertexBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
 					//renderEncoder.setFragmentBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
