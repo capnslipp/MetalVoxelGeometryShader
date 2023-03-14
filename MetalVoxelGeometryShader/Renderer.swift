@@ -31,6 +31,7 @@ class Renderer : NSObject, MTKViewDelegate
 	
 	var commandQueue: MTLCommandQueue!
 	var dynamicUniformBuffer: MTLBuffer!
+	var meshVertexDescriptor: MTLVertexDescriptor!
 	var computePipelineState: MTLComputePipelineState?
 	var renderPipelineState: MTLRenderPipelineState?
 	var depthState: MTLDepthStencilState!
@@ -48,7 +49,9 @@ class Renderer : NSObject, MTKViewDelegate
 	
 	var rotation: Float = 0
 	
+	var meshVerticesCount: Int = 0
 	var meshVerticesBuffer: MTLBuffer!
+	var meshIndicesCount: Int = 0
 	var meshIndicesBuffer: MTLBuffer!
 	
 	var DEBUG_computeOutTexture: MTLTexture!
@@ -99,8 +102,6 @@ class Renderer : NSObject, MTKViewDelegate
 		metalKitView.colorPixelFormat = MTLPixelFormat.bgra8Unorm_srgb
 		metalKitView.sampleCount = 1
 		
-		//let mtlVertexDescriptor = buildMetalVertexDescriptor()
-		
 		do {
 			let path = Bundle.main.path(forResource: "master.Brownstone.NSide", ofType: "vox")!
 			let asset = MDLVoxelAsset(url: URL(fileURLWithPath: path), options: [
@@ -116,7 +117,7 @@ class Renderer : NSObject, MTKViewDelegate
 		}
 		
 		do {
-			(self.meshVerticesBuffer, self.meshIndicesBuffer, _) = try buildComputeMeshBuffer()
+			try buildComputeMeshBuffers()
 			
 			let size = MTLSize(kCubesPerBlockXYZ)
 			self.DEBUG_computeOutTexture = device.makeTexture(descriptor: with(.textureBufferDescriptor(
@@ -136,10 +137,10 @@ class Renderer : NSObject, MTKViewDelegate
 			return nil
 		}
 		
-		let depthStateDescriptor = MTLDepthStencilDescriptor()
-		depthStateDescriptor.depthCompareFunction = MTLCompareFunction.less
-		depthStateDescriptor.isDepthWriteEnabled = true
-		self.depthState = device.makeDepthStencilState(descriptor:depthStateDescriptor)!
+		self.depthState = device.makeDepthStencilState(descriptor: with(.init()){
+			$0.depthCompareFunction = MTLCompareFunction.less
+			$0.isDepthWriteEnabled = true
+		})!
 		
 		do {
 			computePipelineState = try buildComputePipelineWithDevice()
@@ -200,12 +201,23 @@ class Renderer : NSObject, MTKViewDelegate
 				
 				let library = self.device.makeDefaultLibrary()!
 				
+				$0.vertexDescriptor = self.meshVertexDescriptor
+				$0.inputPrimitiveTopology = .triangle
+				
 				let vertexFunction = library.makeFunction(name: "vertexShader")
 				$0.vertexFunction = vertexFunction
 				let fragmentFunction = library.makeFunction(name: "fragmentShader")
 				$0.fragmentFunction = fragmentFunction
 				
-				$0.colorAttachments[0].pixelFormat = metalKitView.colorPixelFormat
+				with($0.colorAttachments[0]){
+					$0.pixelFormat = metalKitView.colorPixelFormat
+					$0.isBlendingEnabled = true
+					
+					$0.sourceRGBBlendFactor = .sourceAlpha
+					$0.destinationRGBBlendFactor = .oneMinusSourceAlpha
+					$0.sourceAlphaBlendFactor = .one
+					$0.destinationAlphaBlendFactor = .zero
+				}
 				$0.depthAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
 				$0.stencilAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
 			},
@@ -225,43 +237,34 @@ class Renderer : NSObject, MTKViewDelegate
 		return state
 	}
 
-	func buildComputeMeshBuffer() throws -> (MTLBuffer, MTLBuffer, MTLVertexDescriptor) {
+	func buildComputeMeshBuffers() throws {
 		let voxelSize = self.voxelTexture.size
 		let voxelCount = voxelSize.width * voxelSize.height * voxelSize.depth
 		
-		let verticesBuffer = with(device.makeBuffer(
-			length: voxelCount * Int(kVertexCountPerCube) * kMeshVertexDataSize,
+		self.meshVerticesCount = voxelCount * Int(kVertexCountPerCube)
+		self.meshVerticesBuffer = with(device.makeBuffer(
+			length: self.meshVerticesCount * kMeshVertexDataSize,
 			options: [ .storageModePrivate ]
 		)!){
 			$0.label = "Generated Mesh Vertices Buffer"
 		}
 		
-		let indicesBuffer = with(device.makeBuffer(
-			length: voxelCount * Int(kVertexCountPerCube) * MemoryLayout<UInt32>.size,
+		self.meshIndicesCount = voxelCount * Int(kVertexCountPerCube)
+		self.meshIndicesBuffer = with(device.makeBuffer(
+			length: meshIndicesCount * MemoryLayout<UInt32>.size,
 			options: [ .storageModePrivate ]
 		)!){
 			$0.label = "Generated Mesh Indices Buffer"
 		}
 		
-		let vertexDescriptor = with(MTLVertexDescriptor()){
-			$0.attributes[0].format = MTLVertexFormat.float3
-			$0.attributes[0].offset = 0
-			$0.attributes[0].bufferIndex = BufferIndex.meshPositions.rawValue
+		self.meshVertexDescriptor = with(MTLVertexDescriptor()){
+			$0.attributes[0].set(format: .uchar3, offset: kMeshVertexDataOffsetOfPosition, bufferIndex: 0)
+			$0.attributes[1].set(format: .uchar4, offset: kMeshVertexDataOffsetOfPrimitive + kMeshPrimitiveDataOffsetOfColor, bufferIndex: 0)
+			$0.attributes[2].set(format: .char3, offset: kMeshVertexDataOffsetOfPrimitive + kMeshPrimitiveDataOffsetOfNormal, bufferIndex: 0)
+			$0.attributes[3].set(format: .uchar3, offset: kMeshVertexDataOffsetOfPrimitive + kMeshPrimitiveDataOffsetOfVoxelCoord, bufferIndex: 0)
 			
-			$0.attributes[VertexAttribute.texcoord.rawValue].format = MTLVertexFormat.float2
-			$0.attributes[VertexAttribute.texcoord.rawValue].offset = 0
-			$0.attributes[VertexAttribute.texcoord.rawValue].bufferIndex = BufferIndex.meshGenerics.rawValue
-			
-			$0.layouts[BufferIndex.meshPositions.rawValue].stride = 12
-			$0.layouts[BufferIndex.meshPositions.rawValue].stepRate = 1
-			$0.layouts[BufferIndex.meshPositions.rawValue].stepFunction = MTLVertexStepFunction.perVertex
-			
-			$0.layouts[BufferIndex.meshGenerics.rawValue].stride = 8
-			$0.layouts[BufferIndex.meshGenerics.rawValue].stepRate = 1
-			$0.layouts[BufferIndex.meshGenerics.rawValue].stepFunction = MTLVertexStepFunction.perVertex
+			$0.layouts[0].set(stepFunction: .perVertex, stepRate: 1, stride: MemoryLayout<MeshVertexData_cpu>.stride)
 		}
-		
-		return (verticesBuffer, indicesBuffer, vertexDescriptor)
 	}
 
 	private func updateDynamicBufferState()
@@ -279,7 +282,7 @@ class Renderer : NSObject, MTKViewDelegate
 	{
 		/// Update any game state before rendering
 
-		uniforms[0].projectionMatrix = projectionMatrix
+		uniforms[0].projectionMatrix = self.projectionMatrix
 
 		let rotationAxis = SIMD3<Float>(1, 1, 0)
 		let modelMatrix = matrix4x4_rotation(radians: rotation, axis: rotationAxis)
@@ -366,10 +369,11 @@ class Renderer : NSObject, MTKViewDelegate
 					
 					renderEncoder.setRenderPipelineState(renderPipelineState)
 					
-					renderEncoder.setDepthStencilState(depthState)
+					renderEncoder.setDepthStencilState(self.depthState)
 					
 					//renderEncoder.setObjectBuffer(objectBuffer, offset: 0, index: 0)
-					renderEncoder.setVertexBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: 0)
+					renderEncoder.setVertexBuffer(self.meshVerticesBuffer, offset: 0, index: 0)
+					renderEncoder.setVertexBuffer(self.dynamicUniformBuffer, offset: self.uniformBufferOffset, index: 1)
 					//renderEncoder.setMeshTexture(meshTexture, atIndex: 2)
 					//renderEncoder.setVertexBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
 					//renderEncoder.setFragmentBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
@@ -387,15 +391,12 @@ class Renderer : NSObject, MTKViewDelegate
 					
 					//renderEncoder.setFragmentTexture(self.voxelTexture, index: TextureIndex.voxel3DColor.rawValue)
 					
-					//for submesh in mesh.submeshes {
-					//	renderEncoder.drawIndexedPrimitives(
-					//		type: submesh.primitiveType,
-					//		indexCount: submesh.indexCount,
-					//		indexType: submesh.indexType,
-					//		indexBuffer: submesh.indexBuffer.buffer,
-					//		indexBufferOffset: submesh.indexBuffer.offset
-					//	)
-					//}
+					renderEncoder.drawIndexedPrimitives(
+						type: .triangle,
+						indexCount: self.meshIndicesCount,
+						indexType: .uint32,
+						indexBuffer: self.meshIndicesBuffer, indexBufferOffset: 0
+					)
 					
 					renderEncoder.popDebugGroup()
 					
@@ -492,6 +493,25 @@ extension MTLSize
 extension MTLTexture
 {
 	var size: MTLSize { MTLSize(width: self.width, height: self.height, depth: self.depth) }
+}
+
+
+extension MTLVertexAttributeDescriptor
+{
+	func set(format: MTLVertexFormat, offset: Int, bufferIndex: Int) {
+		self.format = format
+		self.offset = offset
+		self.bufferIndex = bufferIndex
+	}
+}
+
+extension MTLVertexBufferLayoutDescriptor
+{
+	func set(stepFunction: MTLVertexStepFunction, stepRate: Int, stride: Int) {
+		self.stepFunction = stepFunction
+		self.stepRate = stepRate
+		self.stride = stride
+	}
 }
 
 

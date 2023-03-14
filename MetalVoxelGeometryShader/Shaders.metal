@@ -42,7 +42,7 @@ METAL_FUNC T inverse_lerp(T x, T y, T a) {
 
 typedef struct _MeshPrimitiveData {
 	uchar4 color;
-	uchar3 normal;
+	char3 normal;
 	uchar3 voxelCoord;
 } MeshPrimitiveData;
 static_assert(kMeshPrimitiveDataSize == sizeof(MeshPrimitiveData), "kMeshPrimitiveDataSize must match the size of MeshPrimitiveData.");
@@ -119,19 +119,19 @@ half3 calculateNormal(int threadI) {
 	return normal;
 }
 
-static CONSTANT uchar3 kCubeNormals[kPrimitiveCountPerCube] = {
-	uchar3(-1, 0, 0),
-	uchar3(-1, 0, 0),
-	uchar3(1, 0, 0),
-	uchar3(1, 0, 0),
-	uchar3(0, -1, 0),
-	uchar3(0, -1, 0),
-	uchar3(0, 1, 0),
-	uchar3(0, 1, 0),
-	uchar3(0, 0, -1),
-	uchar3(0, 0, -1),
-	uchar3(0, 0, 1),
-	uchar3(0, 0, 1),
+static CONSTANT char3 kCubeNormals[kPrimitiveCountPerCube] = {
+	char3(-1, 0, 0),
+	char3(-1, 0, 0),
+	char3(1, 0, 0),
+	char3(1, 0, 0),
+	char3(0, -1, 0),
+	char3(0, -1, 0),
+	char3(0, 1, 0),
+	char3(0, 1, 0),
+	char3(0, 0, -1),
+	char3(0, 0, -1),
+	char3(0, 0, 1),
+	char3(0, 0, 1),
 };
 
 MeshPrimitiveData calculatePrimitive(uchar threadI, ushort3 positionInGrid, uchar4 color) {
@@ -173,9 +173,15 @@ kernel void meshGenerationKernel(
 	
 	for (uchar primitiveI = 0; primitiveI < kPrimitiveCountPerCube; ++primitiveI) {
 		thread const MeshTriIndexData &triIndices = calculateTriIndices(primitiveI);
-		outputIndices[primitiveI * 3 + 0] = indexBase + triIndices.indices[0];
-		outputIndices[primitiveI * 3 + 1] = indexBase + triIndices.indices[1];
-		outputIndices[primitiveI * 3 + 2] = indexBase + triIndices.indices[2];
+		//if (color.a > 0) {
+			outputIndices[primitiveI * 3 + 0] = indexBase + triIndices.indices[0];
+			outputIndices[primitiveI * 3 + 1] = indexBase + triIndices.indices[1];
+			outputIndices[primitiveI * 3 + 2] = indexBase + triIndices.indices[2];
+		//} else {
+		//	outputIndices[primitiveI * 3 + 0] = 0xFFFFFFFF;
+		//	outputIndices[primitiveI * 3 + 1] = 0xFFFFFFFF;
+		//	outputIndices[primitiveI * 3 + 2] = 0xFFFFFFFF;
+		//}
 		
 		thread const MeshPrimitiveData &primitive = calculatePrimitive(primitiveI, positionInGrid, color);
 		outputVertices[primitiveI * 3 + 0] = (MeshVertexData){
@@ -199,29 +205,31 @@ kernel void meshGenerationKernel(
 
 // MARK: Vertex Stage
 
-typedef struct {
-	float3 position [[attribute(VertexAttributePosition)]];
-	float2 texCoord [[attribute(VertexAttributeTexcoord)]];
-} Vertex;
+typedef struct _VertexIn {
+	uchar3 position [[attribute(0)]];
+	uchar4 color [[attribute(1)]];
+	char3 normal [[attribute(2)]];
+	uchar3 voxelCoord [[attribute(3)]];
+} VertexIn;
 
-typedef struct {
+typedef struct _VertexToFragment {
 	float4 position [[position]];
-	float2 texCoord;
-	float4 voxelCoord;
-} ColorInOut;
+	half4 color [[flat]];
+	half3 normal [[flat]];;
+} VertexToFragment;
 
-vertex ColorInOut vertexShader(
-	Vertex in [[stage_in]],
-	constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]]
+vertex VertexToFragment vertexShader(
+	VertexIn in [[stage_in]],
+	constant Uniforms & uniforms [[ buffer(1) ]]
 ) {
-	ColorInOut out;
+	VertexToFragment out;
 	
 	const float4x4 transform = uniforms.projectionMatrix * uniforms.modelViewMatrix;
+	out.position = transform * float4(float3(in.position), 1.0);
 	
-	float4 position = float4(in.position, 1.0);
-	out.position = uniforms.projectionMatrix * uniforms.modelViewMatrix * position;
-	out.texCoord = in.texCoord;
-	out.voxelCoord = uniforms.modelMatrix * position;
+	out.color = half4(in.color) / 255.0h;
+	
+	out.normal = half3(in.normal);
 
 	return out;
 }
@@ -249,15 +257,8 @@ vertex ColorInOut vertexShader(
 
 // MARK: Fragment Stage
 
-struct FragmentIn
-{
-	half4 color;
-	half3 normal;
-	//MeshPrimitiveData primitiveData;
-};
-
 fragment half4 fragmentShader(
-	FragmentIn in [[stage_in]]
+	VertexToFragment in [[stage_in]]
 	//constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]]
 ) {
 	half4 color = in.color;

@@ -23,6 +23,7 @@
 #include <simd/simd.h>
 #if defined(__METAL_VERSION__)
 #else
+	#define char3 simd_char3
 	#define uchar simd_uchar1
 	#define uchar3 simd_uchar3
 	#define uchar4 simd_uchar4
@@ -83,16 +84,21 @@ static CONSTANT size_t kObjectToMeshPayloadMemoryLength = kObjectToMeshPayloadSi
 
 typedef struct _MeshPrimitiveData_cpu {
 	uchar4 color;
-	uchar3 normal;
+	char3 normal;
 	uchar3 voxelCoord;
 } MeshPrimitiveData_cpu;
 static CONSTANT size_t kMeshPrimitiveDataSize = sizeof(MeshPrimitiveData_cpu);
+static CONSTANT size_t kMeshPrimitiveDataOffsetOfColor = offsetof(MeshPrimitiveData_cpu, color);
+static CONSTANT size_t kMeshPrimitiveDataOffsetOfNormal = offsetof(MeshPrimitiveData_cpu, normal);
+static CONSTANT size_t kMeshPrimitiveDataOffsetOfVoxelCoord = offsetof(MeshPrimitiveData_cpu, voxelCoord);
 
 typedef struct _MeshVertexData_cpu {
 	uchar3 position;
 	MeshPrimitiveData_cpu primitive;
 } MeshVertexData_cpu;
 static CONSTANT size_t kMeshVertexDataSize = sizeof(MeshVertexData_cpu);
+static CONSTANT size_t kMeshVertexDataOffsetOfPosition = offsetof(MeshVertexData_cpu, position);
+static CONSTANT size_t kMeshVertexDataOffsetOfPrimitive = offsetof(MeshVertexData_cpu, primitive);
 
 typedef struct _MeshTriIndexData_cpu {
 	uint indices[3];
