@@ -46,8 +46,10 @@ fileprivate extension MTLSize
 
 extension MTLDevice
 {
-	func makeVoxel3DTextureRGBA(fromAsset asset: MDLVoxelAsset, model: MDLVoxelAssetModel) -> MTLTexture?
+	func makeVoxel3DTextureRGBA(fromAsset asset: MDLVoxelAsset, model: MDLVoxelAssetModel? = nil) -> MTLTexture?
 	{
+		let model = model ?? asset.models.first!
+		
 		let size = withMap(model.voxelDimensions){ MTLSize(width: Int($0.x), height: Int($0.y), depth: Int($0.z)) }
 		
 		let descriptor = with(MTLTextureDescriptor.textureBufferDescriptor(

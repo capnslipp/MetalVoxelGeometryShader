@@ -9,6 +9,7 @@
 
 import Metal
 import MetalKit
+import MetalPerformanceShaders
 import simd
 import MDLVoxelAsset
 import With
@@ -83,6 +84,8 @@ class Renderer : NSObject, MTKViewDelegate
 		self.metalKitView = metalKitView
 		self.device = metalKitView.device!
 		
+		print("MPSSupportsMTLDevice: \(MPSSupportsMTLDevice(device))")
+		
 		super.init()
 		
 		self.commandQueue = self.device.makeCommandQueue()!
@@ -105,12 +108,12 @@ class Renderer : NSObject, MTKViewDelegate
 		do {
 			let path = Bundle.main.path(forResource: "master.Brownstone.NSide", ofType: "vox")!
 			let asset = MDLVoxelAsset(url: URL(fileURLWithPath: path), options: [
-				kMDLVoxelAssetOptionCalculateShellLevels: false,
-				kMDLVoxelAssetOptionSkipNonZeroShellMesh: false,
-				kMDLVoxelAssetOptionConvertZUpToYUp: false,
-				kMDLVoxelAssetOptionMeshGenerationMode: MDLVoxelAssetMeshGenerationMode.skip.rawValue,
+				kMDLVoxelAssetOptionCalculateShellLevels: true,
+				kMDLVoxelAssetOptionSkipNonZeroShellMesh: true,
+				kMDLVoxelAssetOptionConvertZUpToYUp: false
 			])
-			self.voxelTexture = device.makeVoxel3DTextureRGBA(fromAsset: asset, model: asset.models.first!)!
+			print("asset.models.first!.voxelCount: \(asset.models.first!.voxelCount)")
+			self.voxelTexture = device.makeVoxel3DTextureRGBA(fromAsset: asset)!
 		} catch {
 			print("Unable to generate texture. Error info: \(error)")
 			return nil
@@ -323,7 +326,12 @@ class Renderer : NSObject, MTKViewDelegate
 			
 			if let renderPassDescriptor = renderPassDescriptor
 			{
-				if let computePipelineState, let computeEncoder = commandBuffer.makeComputeCommandEncoder() {
+				let computedGeometryFence = device.makeFence()!
+				
+				if let computePipelineState, let computeEncoder = commandBuffer.makeComputeCommandEncoder(descriptor: with(.init()){
+					$0.dispatchType = .concurrent
+					//$0.sampleBufferAttachments[0].
+				}) {
 					computeEncoder.label = "Primary Compute Encoder for draw #\(_drawCallID)"
 					
 					computeEncoder.setComputePipelineState(computePipelineState)
@@ -354,6 +362,8 @@ class Renderer : NSObject, MTKViewDelegate
 					//renderEncoder.drawMeshThreadgroups(objectThreadgroupCount, threadsPerObjectThreadgroup: objectThreadCount, threadsPerMeshThreadgroup: meshThreadCount)
 					computeEncoder.dispatchThreads(self.voxelTexture.size, threadsPerThreadgroup: MTLSize(kCubesPerBlockXYZ))
 					
+					computeEncoder.updateFence(computedGeometryFence)
+					
 					computeEncoder.endEncoding()
 				}
 				
@@ -362,6 +372,9 @@ class Renderer : NSObject, MTKViewDelegate
 					renderEncoder.label = "Primary Render Encoder for draw #\(_drawCallID)"
 					
 					renderEncoder.pushDebugGroup("Draw Box")
+					
+					renderEncoder.memoryBarrier(resources: [ self.meshVerticesBuffer, self.meshIndicesBuffer ], after: [], before: .vertex)
+					renderEncoder.waitForFence(computedGeometryFence, before: .vertex)
 					
 					renderEncoder.setCullMode(.back)
 					

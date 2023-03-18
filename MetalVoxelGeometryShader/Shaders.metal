@@ -173,15 +173,15 @@ kernel void meshGenerationKernel(
 	
 	for (uchar primitiveI = 0; primitiveI < kPrimitiveCountPerCube; ++primitiveI) {
 		thread const MeshTriIndexData &triIndices = calculateTriIndices(primitiveI);
-		//if (color.a > 0) {
+		if (color.a > 0) {
 			outputIndices[primitiveI * 3 + 0] = indexBase + triIndices.indices[0];
 			outputIndices[primitiveI * 3 + 1] = indexBase + triIndices.indices[1];
 			outputIndices[primitiveI * 3 + 2] = indexBase + triIndices.indices[2];
-		//} else {
-		//	outputIndices[primitiveI * 3 + 0] = 0xFFFFFFFF;
-		//	outputIndices[primitiveI * 3 + 1] = 0xFFFFFFFF;
-		//	outputIndices[primitiveI * 3 + 2] = 0xFFFFFFFF;
-		//}
+		} else {
+			outputIndices[primitiveI * 3 + 0] = 0xFFFFFFFF;
+			outputIndices[primitiveI * 3 + 1] = 0xFFFFFFFF;
+			outputIndices[primitiveI * 3 + 2] = 0xFFFFFFFF;
+		}
 		
 		thread const MeshPrimitiveData &primitive = calculatePrimitive(primitiveI, positionInGrid, color);
 		outputVertices[primitiveI * 3 + 0] = (MeshVertexData){
