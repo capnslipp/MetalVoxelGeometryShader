@@ -11,7 +11,10 @@
 		FA3C8DB429B30EE90097A95D /* MDLVoxelAsset.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA3C8DA129B30EC50097A95D /* MDLVoxelAsset.framework */; };
 		FA3C8DB529B30EE90097A95D /* MDLVoxelAsset.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FA3C8DA129B30EC50097A95D /* MDLVoxelAsset.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FA3C8DBC29B3120D0097A95D /* With in Frameworks */ = {isa = PBXBuildFile; productRef = FA3C8DBB29B3120D0097A95D /* With */; };
-		FA3C8DBE29B321F70097A95D /* master.Brownstone.NSide.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA3C8DBD29B321F70097A95D /* master.Brownstone.NSide.vox */; };
+		FA65CD7729D652AE006F6391 /* monu7.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA65CD7329D652AD006F6391 /* monu7.vox */; };
+		FA65CD7829D652AE006F6391 /* chr_sword.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA65CD7429D652AD006F6391 /* chr_sword.vox */; };
+		FA65CD7929D652AE006F6391 /* master.Brownstone.NSide.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA65CD7529D652AD006F6391 /* master.Brownstone.NSide.vox */; };
+		FA65CD7A29D652AE006F6391 /* ParkSingle.Christmas2018.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA65CD7629D652AD006F6391 /* ParkSingle.Christmas2018.vox */; };
 		FA7780A929AEFA45005092B1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7780A829AEFA45005092B1 /* AppDelegate.swift */; };
 		FA7780AB29AEFA45005092B1 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7780AA29AEFA45005092B1 /* GameViewController.swift */; };
 		FA7780AD29AEFA45005092B1 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7780AC29AEFA45005092B1 /* Renderer.swift */; };
@@ -82,7 +85,10 @@
 /* Begin PBXFileReference section */
 		FA3C8D9029B30D6F0097A95D /* Voxel3DTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Voxel3DTexture.swift; sourceTree = "<group>"; };
 		FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MDLVoxelAsset.xcodeproj; path = ../MDLVoxelAsset/MDLVoxelAsset.xcodeproj; sourceTree = "<group>"; };
-		FA3C8DBD29B321F70097A95D /* master.Brownstone.NSide.vox */ = {isa = PBXFileReference; lastKnownFileType = file; path = master.Brownstone.NSide.vox; sourceTree = "<group>"; };
+		FA65CD7329D652AD006F6391 /* monu7.vox */ = {isa = PBXFileReference; lastKnownFileType = file; path = monu7.vox; sourceTree = "<group>"; };
+		FA65CD7429D652AD006F6391 /* chr_sword.vox */ = {isa = PBXFileReference; lastKnownFileType = file; path = chr_sword.vox; sourceTree = "<group>"; };
+		FA65CD7529D652AD006F6391 /* master.Brownstone.NSide.vox */ = {isa = PBXFileReference; lastKnownFileType = file; path = master.Brownstone.NSide.vox; sourceTree = "<group>"; };
+		FA65CD7629D652AD006F6391 /* ParkSingle.Christmas2018.vox */ = {isa = PBXFileReference; lastKnownFileType = file; path = ParkSingle.Christmas2018.vox; sourceTree = "<group>"; };
 		FA7780A529AEFA45005092B1 /* MetalVoxelGeometryShader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalVoxelGeometryShader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA7780A829AEFA45005092B1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FA7780AA29AEFA45005092B1 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
@@ -128,6 +134,17 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		FA65CD7229D652AD006F6391 /* VoxModels */ = {
+			isa = PBXGroup;
+			children = (
+				FA65CD7329D652AD006F6391 /* monu7.vox */,
+				FA65CD7429D652AD006F6391 /* chr_sword.vox */,
+				FA65CD7529D652AD006F6391 /* master.Brownstone.NSide.vox */,
+				FA65CD7629D652AD006F6391 /* ParkSingle.Christmas2018.vox */,
+			);
+			path = VoxModels;
+			sourceTree = "<group>";
+		};
 		FA77809C29AEFA45005092B1 = {
 			isa = PBXGroup;
 			children = (
@@ -148,7 +165,7 @@
 		FA7780A729AEFA45005092B1 /* MetalVoxelGeometryShader */ = {
 			isa = PBXGroup;
 			children = (
-				FA3C8DBD29B321F70097A95D /* master.Brownstone.NSide.vox */,
+				FA65CD7229D652AD006F6391 /* VoxModels */,
 				FA7780A829AEFA45005092B1 /* AppDelegate.swift */,
 				FA7780AA29AEFA45005092B1 /* GameViewController.swift */,
 				FA7780AC29AEFA45005092B1 /* Renderer.swift */,
@@ -278,9 +295,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA3C8DBE29B321F70097A95D /* master.Brownstone.NSide.vox in Resources */,
+				FA65CD7A29D652AE006F6391 /* ParkSingle.Christmas2018.vox in Resources */,
+				FA65CD7929D652AE006F6391 /* master.Brownstone.NSide.vox in Resources */,
 				FA7780B229AEFA49005092B1 /* Assets.xcassets in Resources */,
 				FA7780B529AEFA49005092B1 /* Main.storyboard in Resources */,
+				FA65CD7729D652AE006F6391 /* monu7.vox in Resources */,
+				FA65CD7829D652AE006F6391 /* chr_sword.vox in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
