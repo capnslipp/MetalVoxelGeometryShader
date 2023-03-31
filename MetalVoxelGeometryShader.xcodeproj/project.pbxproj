@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		FA3C8D9129B30D6F0097A95D /* Voxel3DTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C8D9029B30D6F0097A95D /* Voxel3DTexture.swift */; };
-		FA3C8DB429B30EE90097A95D /* MDLVoxelAsset.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA3C8DA129B30EC50097A95D /* MDLVoxelAsset.framework */; };
-		FA3C8DB529B30EE90097A95D /* MDLVoxelAsset.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FA3C8DA129B30EC50097A95D /* MDLVoxelAsset.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FA3C8DBC29B3120D0097A95D /* With in Frameworks */ = {isa = PBXBuildFile; productRef = FA3C8DBB29B3120D0097A95D /* With */; };
 		FA65CD7729D652AE006F6391 /* monu7.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA65CD7329D652AD006F6391 /* monu7.vox */; };
 		FA65CD7829D652AE006F6391 /* chr_sword.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA65CD7429D652AD006F6391 /* chr_sword.vox */; };
@@ -21,16 +19,26 @@
 		FA7780AF29AEFA45005092B1 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = FA7780AE29AEFA45005092B1 /* Shaders.metal */; };
 		FA7780B229AEFA49005092B1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA7780B129AEFA49005092B1 /* Assets.xcassets */; };
 		FA7780B529AEFA49005092B1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA7780B329AEFA49005092B1 /* Main.storyboard */; };
+		FAA6CED429D67C4900EECC6C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA6CED329D67C4900EECC6C /* AppDelegate.swift */; };
+		FAA6CED929D67C4900EECC6C /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA6CED829D67C4900EECC6C /* GameViewController.swift */; };
+		FAA6CEDE29D67C4900EECC6C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FAA6CEDC29D67C4900EECC6C /* Main.storyboard */; };
+		FAA6CEE329D67C4B00EECC6C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FAA6CEE129D67C4B00EECC6C /* LaunchScreen.storyboard */; };
+		FAA6CEE829D67CD700EECC6C /* master.Brownstone.NSide.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA65CD7529D652AD006F6391 /* master.Brownstone.NSide.vox */; };
+		FAA6CEE929D67CD700EECC6C /* ParkSingle.Christmas2018.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA65CD7629D652AD006F6391 /* ParkSingle.Christmas2018.vox */; };
+		FAA6CEEA29D67CD700EECC6C /* monu7.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA65CD7329D652AD006F6391 /* monu7.vox */; };
+		FAA6CEEB29D67CD700EECC6C /* chr_sword.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA65CD7429D652AD006F6391 /* chr_sword.vox */; };
+		FAA6CEEC29D67CDA00EECC6C /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7780AC29AEFA45005092B1 /* Renderer.swift */; };
+		FAA6CEED29D67CDC00EECC6C /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = FA7780AE29AEFA45005092B1 /* Shaders.metal */; };
+		FAA6CEEE29D67CE000EECC6C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA7780B129AEFA49005092B1 /* Assets.xcassets */; };
+		FAA6CEEF29D67CE300EECC6C /* Voxel3DTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C8D9029B30D6F0097A95D /* Voxel3DTexture.swift */; };
+		FAA6CEF429D67EDF00EECC6C /* With in Frameworks */ = {isa = PBXBuildFile; productRef = FAA6CEF329D67EDF00EECC6C /* With */; };
+		FAA6CF3B29D692B700EECC6C /* MDLVoxelAsset.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA6CF3A29D6921800EECC6C /* MDLVoxelAsset.framework */; };
+		FAA6CF3C29D692B700EECC6C /* MDLVoxelAsset.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FAA6CF3A29D6921800EECC6C /* MDLVoxelAsset.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FAA6CF3D29D692BC00EECC6C /* MDLVoxelAsset.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA6CF3A29D6921800EECC6C /* MDLVoxelAsset.framework */; };
+		FAA6CF3E29D692BC00EECC6C /* MDLVoxelAsset.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FAA6CF3A29D6921800EECC6C /* MDLVoxelAsset.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		FA3C8DA029B30EC50097A95D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = FA9CACCA1CF17E0200B1ABA4;
-			remoteInfo = "MDLVoxelAsset (OS X)";
-		};
 		FA3C8DA229B30EC50097A95D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
@@ -66,6 +74,13 @@
 			remoteGlobalIDString = FAF7D4601E73E1B7007CFA66;
 			remoteInfo = convertToJSON;
 		};
+		FAA6CF3929D6921800EECC6C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3C8D9429B30EC50097A95D /* MDLVoxelAsset.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FAA6CF0829D690A700EECC6C;
+			remoteInfo = MDLVoxelAsset;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -75,7 +90,18 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				FA3C8DB529B30EE90097A95D /* MDLVoxelAsset.framework in Embed Frameworks */,
+				FAA6CF3E29D692BC00EECC6C /* MDLVoxelAsset.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FAA6CEFD29D687C600EECC6C /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FAA6CF3C29D692B700EECC6C /* MDLVoxelAsset.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -98,6 +124,11 @@
 		FA7780B129AEFA49005092B1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FA7780B429AEFA49005092B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FA7780B629AEFA49005092B1 /* MetalVoxelGeometryShader.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MetalVoxelGeometryShader.entitlements; sourceTree = "<group>"; };
+		FAA6CED129D67C4900EECC6C /* MetalVoxelGeometryShader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalVoxelGeometryShader.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FAA6CED329D67C4900EECC6C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		FAA6CED829D67C4900EECC6C /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
+		FAA6CEDD29D67C4900EECC6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		FAA6CEE229D67C4B00EECC6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,8 +136,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAA6CF3D29D692BC00EECC6C /* MDLVoxelAsset.framework in Frameworks */,
 				FA3C8DBC29B3120D0097A95D /* With in Frameworks */,
-				FA3C8DB429B30EE90097A95D /* MDLVoxelAsset.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FAA6CECE29D67C4900EECC6C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FAA6CF3B29D692B700EECC6C /* MDLVoxelAsset.framework in Frameworks */,
+				FAA6CEF429D67EDF00EECC6C /* With in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,7 +164,7 @@
 		FA3C8D9529B30EC50097A95D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FA3C8DA129B30EC50097A95D /* MDLVoxelAsset.framework */,
+				FAA6CF3A29D6921800EECC6C /* MDLVoxelAsset.framework */,
 				FA3C8DA329B30EC50097A95D /* MDLVoxelAssetTests.xctest */,
 				FA3C8DA529B30EC50097A95D /* MDLVoxelAssetTests.xctest */,
 				FA3C8DA729B30EC50097A95D /* VoxViewer.app */,
@@ -149,6 +189,8 @@
 			isa = PBXGroup;
 			children = (
 				FA7780A729AEFA45005092B1 /* MetalVoxelGeometryShader */,
+				FAA6CEE729D67C8900EECC6C /* MetalVoxelGeometryShader-macOS */,
+				FAA6CED229D67C4900EECC6C /* MetalVoxelGeometryShader-iOS */,
 				FA7780A629AEFA45005092B1 /* Products */,
 				FA3C8D9229B30EAB0097A95D /* Frameworks */,
 			);
@@ -158,6 +200,7 @@
 			isa = PBXGroup;
 			children = (
 				FA7780A529AEFA45005092B1 /* MetalVoxelGeometryShader.app */,
+				FAA6CED129D67C4900EECC6C /* MetalVoxelGeometryShader.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -166,25 +209,43 @@
 			isa = PBXGroup;
 			children = (
 				FA65CD7229D652AD006F6391 /* VoxModels */,
-				FA7780A829AEFA45005092B1 /* AppDelegate.swift */,
-				FA7780AA29AEFA45005092B1 /* GameViewController.swift */,
 				FA7780AC29AEFA45005092B1 /* Renderer.swift */,
 				FA7780AE29AEFA45005092B1 /* Shaders.metal */,
 				FA7780B029AEFA45005092B1 /* ShaderTypes.h */,
 				FA7780B129AEFA49005092B1 /* Assets.xcassets */,
-				FA7780B329AEFA49005092B1 /* Main.storyboard */,
-				FA7780B629AEFA49005092B1 /* MetalVoxelGeometryShader.entitlements */,
 				FA3C8D9029B30D6F0097A95D /* Voxel3DTexture.swift */,
 			);
 			path = MetalVoxelGeometryShader;
 			sourceTree = "<group>";
 		};
+		FAA6CED229D67C4900EECC6C /* MetalVoxelGeometryShader-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				FAA6CED329D67C4900EECC6C /* AppDelegate.swift */,
+				FAA6CED829D67C4900EECC6C /* GameViewController.swift */,
+				FAA6CEDC29D67C4900EECC6C /* Main.storyboard */,
+				FAA6CEE129D67C4B00EECC6C /* LaunchScreen.storyboard */,
+			);
+			path = "MetalVoxelGeometryShader-iOS";
+			sourceTree = "<group>";
+		};
+		FAA6CEE729D67C8900EECC6C /* MetalVoxelGeometryShader-macOS */ = {
+			isa = PBXGroup;
+			children = (
+				FA7780A829AEFA45005092B1 /* AppDelegate.swift */,
+				FA7780AA29AEFA45005092B1 /* GameViewController.swift */,
+				FA7780B329AEFA49005092B1 /* Main.storyboard */,
+				FA7780B629AEFA49005092B1 /* MetalVoxelGeometryShader.entitlements */,
+			);
+			path = "MetalVoxelGeometryShader-macOS";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		FA7780A429AEFA45005092B1 /* MetalVoxelGeometryShader */ = {
+		FA7780A429AEFA45005092B1 /* MetalVoxelGeometryShader (macOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FA7780B929AEFA49005092B1 /* Build configuration list for PBXNativeTarget "MetalVoxelGeometryShader" */;
+			buildConfigurationList = FA7780B929AEFA49005092B1 /* Build configuration list for PBXNativeTarget "MetalVoxelGeometryShader (macOS)" */;
 			buildPhases = (
 				FA7780A129AEFA45005092B1 /* Sources */,
 				FA7780A229AEFA45005092B1 /* Frameworks */,
@@ -195,12 +256,33 @@
 			);
 			dependencies = (
 			);
-			name = MetalVoxelGeometryShader;
+			name = "MetalVoxelGeometryShader (macOS)";
 			packageProductDependencies = (
 				FA3C8DBB29B3120D0097A95D /* With */,
 			);
 			productName = MetalVoxelGeometryShader;
 			productReference = FA7780A529AEFA45005092B1 /* MetalVoxelGeometryShader.app */;
+			productType = "com.apple.product-type.application";
+		};
+		FAA6CED029D67C4900EECC6C /* MetalVoxelGeometryShader (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FAA6CEE429D67C4B00EECC6C /* Build configuration list for PBXNativeTarget "MetalVoxelGeometryShader (iOS)" */;
+			buildPhases = (
+				FAA6CECD29D67C4900EECC6C /* Sources */,
+				FAA6CECE29D67C4900EECC6C /* Frameworks */,
+				FAA6CECF29D67C4900EECC6C /* Resources */,
+				FAA6CEFD29D687C600EECC6C /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MetalVoxelGeometryShader (iOS)";
+			packageProductDependencies = (
+				FAA6CEF329D67EDF00EECC6C /* With */,
+			);
+			productName = "MetalVoxelGeometryShader-iOS";
+			productReference = FAA6CED129D67C4900EECC6C /* MetalVoxelGeometryShader.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -214,6 +296,9 @@
 				LastUpgradeCheck = 1420;
 				TargetAttributes = {
 					FA7780A429AEFA45005092B1 = {
+						CreatedOnToolsVersion = 14.2;
+					};
+					FAA6CED029D67C4900EECC6C = {
 						CreatedOnToolsVersion = 14.2;
 					};
 				};
@@ -240,19 +325,13 @@
 			);
 			projectRoot = "";
 			targets = (
-				FA7780A429AEFA45005092B1 /* MetalVoxelGeometryShader */,
+				FA7780A429AEFA45005092B1 /* MetalVoxelGeometryShader (macOS) */,
+				FAA6CED029D67C4900EECC6C /* MetalVoxelGeometryShader (iOS) */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		FA3C8DA129B30EC50097A95D /* MDLVoxelAsset.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = MDLVoxelAsset.framework;
-			remoteRef = FA3C8DA029B30EC50097A95D /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		FA3C8DA329B30EC50097A95D /* MDLVoxelAssetTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
@@ -288,6 +367,13 @@
 			remoteRef = FA3C8DAA29B30EC50097A95D /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		FAA6CF3A29D6921800EECC6C /* MDLVoxelAsset.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MDLVoxelAsset.framework;
+			remoteRef = FAA6CF3929D6921800EECC6C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -301,6 +387,20 @@
 				FA7780B529AEFA49005092B1 /* Main.storyboard in Resources */,
 				FA65CD7729D652AE006F6391 /* monu7.vox in Resources */,
 				FA65CD7829D652AE006F6391 /* chr_sword.vox in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FAA6CECF29D67C4900EECC6C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FAA6CEE829D67CD700EECC6C /* master.Brownstone.NSide.vox in Resources */,
+				FAA6CEE329D67C4B00EECC6C /* LaunchScreen.storyboard in Resources */,
+				FAA6CEEA29D67CD700EECC6C /* monu7.vox in Resources */,
+				FAA6CEEB29D67CD700EECC6C /* chr_sword.vox in Resources */,
+				FAA6CEEE29D67CE000EECC6C /* Assets.xcassets in Resources */,
+				FAA6CEE929D67CD700EECC6C /* ParkSingle.Christmas2018.vox in Resources */,
+				FAA6CEDE29D67C4900EECC6C /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,6 +419,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FAA6CECD29D67C4900EECC6C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FAA6CEEF29D67CE300EECC6C /* Voxel3DTexture.swift in Sources */,
+				FAA6CEED29D67CDC00EECC6C /* Shaders.metal in Sources */,
+				FAA6CED929D67C4900EECC6C /* GameViewController.swift in Sources */,
+				FAA6CEEC29D67CDA00EECC6C /* Renderer.swift in Sources */,
+				FAA6CED429D67C4900EECC6C /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
@@ -328,6 +440,22 @@
 				FA7780B429AEFA49005092B1 /* Base */,
 			);
 			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		FAA6CEDC29D67C4900EECC6C /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				FAA6CEDD29D67C4900EECC6C /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		FAA6CEE129D67C4B00EECC6C /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				FAA6CEE229D67C4B00EECC6C /* Base */,
+			);
+			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -455,7 +583,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = MetalVoxelGeometryShader/MetalVoxelGeometryShader.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "MetalVoxelGeometryShader-macOS/MetalVoxelGeometryShader.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -470,10 +598,10 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.slippyd.MetalVoxelGeometryShader;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.slippyd.$(PRODUCT_NAME)";
+				PRODUCT_NAME = MetalVoxelGeometryShader;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "$(TARGET_NAME)/ShaderTypes.h";
+				SWIFT_OBJC_BRIDGING_HEADER = MetalVoxelGeometryShader/ShaderTypes.h;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -483,7 +611,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = MetalVoxelGeometryShader/MetalVoxelGeometryShader.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "MetalVoxelGeometryShader-macOS/MetalVoxelGeometryShader.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -498,11 +626,76 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.slippyd.MetalVoxelGeometryShader;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.slippyd.$(PRODUCT_NAME)";
+				PRODUCT_NAME = MetalVoxelGeometryShader;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "$(TARGET_NAME)/ShaderTypes.h";
+				SWIFT_OBJC_BRIDGING_HEADER = MetalVoxelGeometryShader/ShaderTypes.h;
 				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		FAA6CEE529D67C4B00EECC6C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UQQE2H6P34;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = metal;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.slippyd.$(PRODUCT_NAME)";
+				PRODUCT_NAME = MetalVoxelGeometryShader;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = MetalVoxelGeometryShader/ShaderTypes.h;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FAA6CEE629D67C4B00EECC6C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UQQE2H6P34;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = metal;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.slippyd.$(PRODUCT_NAME)";
+				PRODUCT_NAME = MetalVoxelGeometryShader;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = MetalVoxelGeometryShader/ShaderTypes.h;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -518,11 +711,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FA7780B929AEFA49005092B1 /* Build configuration list for PBXNativeTarget "MetalVoxelGeometryShader" */ = {
+		FA7780B929AEFA49005092B1 /* Build configuration list for PBXNativeTarget "MetalVoxelGeometryShader (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FA7780BA29AEFA49005092B1 /* Debug */,
 				FA7780BB29AEFA49005092B1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FAA6CEE429D67C4B00EECC6C /* Build configuration list for PBXNativeTarget "MetalVoxelGeometryShader (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FAA6CEE529D67C4B00EECC6C /* Debug */,
+				FAA6CEE629D67C4B00EECC6C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -542,6 +744,11 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		FA3C8DBB29B3120D0097A95D /* With */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA3C8DBA29B3120D0097A95D /* XCRemoteSwiftPackageReference "With" */;
+			productName = With;
+		};
+		FAA6CEF329D67EDF00EECC6C /* With */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = FA3C8DBA29B3120D0097A95D /* XCRemoteSwiftPackageReference "With" */;
 			productName = With;

@@ -5,7 +5,13 @@
 //  Created by Cap'n Slipp on 3/3/23.
 //
 
-import AppKit
+#if os(macOS)
+	import AppKit
+	typealias Color = NSColor
+#else
+	import UIKit
+	typealias Color = UIColor
+#endif
 import Metal
 import MDLVoxelAsset
 import With
@@ -16,13 +22,13 @@ struct Voxel3DTextureRGBAColor
 {
 	let r: UInt8, g: UInt8, b: UInt8, a: UInt8
 	
-	static func from(nsColor: NSColor) -> Voxel3DTextureRGBAColor {
-		let rgbColor = nsColor.usingColorSpace(.genericRGB)!
+	static func from(color: Color) -> Voxel3DTextureRGBAColor {
+		let rgbColor = color.cgColor.converted(to: .init(name: CGColorSpace.sRGB)!, intent: .defaultIntent, options: nil)!
 		return Voxel3DTextureRGBAColor(
-			r: UInt8(rgbColor.redComponent * CGFloat(UInt8.max)),
-			g: UInt8(rgbColor.greenComponent * CGFloat(UInt8.max)),
-			b: UInt8(rgbColor.blueComponent * CGFloat(UInt8.max)),
-			a: UInt8(rgbColor.alphaComponent * CGFloat(UInt8.max))
+			r: UInt8(rgbColor.components![0] * CGFloat(UInt8.max)),
+			g: UInt8(rgbColor.components![1] * CGFloat(UInt8.max)),
+			b: UInt8(rgbColor.components![2] * CGFloat(UInt8.max)),
+			a: UInt8(rgbColor.alpha * CGFloat(UInt8.max))
 		)
 	}
 }
@@ -55,7 +61,13 @@ extension MTLDevice
 			d.depth = size.depth
 			
 			d.cpuCacheMode = .writeCombined
-			d.storageMode = .managed
+			d.storageMode = {
+				#if os(macOS)
+					return .managed
+				#else
+					return .shared
+				#endif
+			}()
 		}
 		
 		guard let texture = self.makeTexture(descriptor: descriptor) else {
@@ -64,7 +76,7 @@ extension MTLDevice
 		
 		let voxelCount = Int(size.x * size.y * size.z)
 		
-		let paletteTextureColors = asset.paletteColors.map(Voxel3DTextureRGBAColor.from(nsColor:))
+		let paletteTextureColors = asset.paletteColors.map(Voxel3DTextureRGBAColor.from(color:))
 		
 		var rawData = [Voxel3DTextureRGBAColor](
 			unsafeUninitializedCapacity: voxelCount,
