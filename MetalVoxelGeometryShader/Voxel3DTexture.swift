@@ -35,15 +35,6 @@ struct Voxel3DTextureRGBAColor
 
 
 
-fileprivate extension MTLSize
-{
-	var x: Int { self.width }
-	var y: Int { self.height }
-	var z: Int { self.depth }
-}
-
-
-
 extension MTLDevice
 {
 	func makeVoxel3DTextureRGBA(fromAsset asset: MDLVoxelAsset, model: MDLVoxelAssetModel? = nil) -> MTLTexture?

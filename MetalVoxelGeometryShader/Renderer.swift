@@ -485,30 +485,6 @@ func radians_from_degrees(_ degrees: Float) -> Float {
 }
 
 
-extension MTLSize
-{
-	init(_ width: Int, _ height: Int, _ depth: Int) {
-		self.init(width: width, height: height, depth: depth)
-	}
-	
-	init(_ size: uint3) {
-		self.init(Int(size.x), Int(size.y), Int(size.z))
-	}
-	
-	init(width: uint) {
-		self.init(Int(width), 1, 1)
-	}
-	
-	static let one = MTLSize(1, 1, 1)
-}
-
-
-extension MTLTexture
-{
-	var size: MTLSize { MTLSize(width: self.width, height: self.height, depth: self.depth) }
-}
-
-
 extension MTLVertexAttributeDescriptor
 {
 	func set(format: MTLVertexFormat, offset: Int, bufferIndex: Int) {
