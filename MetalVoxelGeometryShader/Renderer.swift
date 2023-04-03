@@ -252,7 +252,7 @@ class Renderer : NSObject, MTKViewDelegate
 			$0.label = "Generated Mesh Vertices Buffer"
 		}
 		
-		self.meshIndicesCount = voxelCount * Int(kVertexCountPerCube)
+		self.meshIndicesCount = voxelCount * Int(kIndexCountPerCube)
 		self.meshIndicesBuffer = with(device.makeBuffer(
 			length: meshIndicesCount * MemoryLayout<UInt32>.size,
 			options: [ .storageModePrivate ]
@@ -345,12 +345,10 @@ class Renderer : NSObject, MTKViewDelegate
 					computeEncoder.setBuffer(self.meshIndicesBuffer, offset: 0, index: 2)
 					
 					
+					let threadsPerThreadgroup = MTLSize(kCubesPerBlockXYZ)
+					
 					// threadgroupsPerGrid: The number of threadgroups in the object (if present) or mesh shader grid.
-					//let objectThreadgroupCount = MTLSize(
-					//	width: self.voxelTexture.width / objectThreads.width,
-					//	height: self.voxelTexture.height / objectThreads.height,
-					//	depth: self.voxelTexture.depth / objectThreads.depth
-					//)
+					let threadgroupsPerGrid = self.voxelTexture.size.dividing(by: threadsPerThreadgroup, round: .awayFromZero)
 					//let objectThreadgroupCount = MTLSize(width: kMaxTotalThreadgroupsPerMeshGrid)
 					
 					// threadsPerObjectThreadgroup: The number of threads in one object shader threadgroup. Ignored if object shader is not present.
@@ -360,7 +358,7 @@ class Renderer : NSObject, MTKViewDelegate
 					//let meshThreadCount = MTLSize(width: kThreadsPerCube)
 					
 					//renderEncoder.drawMeshThreadgroups(objectThreadgroupCount, threadsPerObjectThreadgroup: objectThreadCount, threadsPerMeshThreadgroup: meshThreadCount)
-					computeEncoder.dispatchThreads(self.voxelTexture.size, threadsPerThreadgroup: MTLSize(kCubesPerBlockXYZ))
+					computeEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: MTLSize(kCubesPerBlockXYZ))
 					
 					computeEncoder.updateFence(computedGeometryFence)
 					
@@ -373,7 +371,9 @@ class Renderer : NSObject, MTKViewDelegate
 					
 					renderEncoder.pushDebugGroup("Draw Box")
 					
-					renderEncoder.memoryBarrier(resources: [ self.meshVerticesBuffer, self.meshIndicesBuffer ], after: [], before: .vertex)
+					#if os(macOS)
+						renderEncoder.memoryBarrier(resources: [ self.meshVerticesBuffer, self.meshIndicesBuffer ], after: [], before: .vertex)
+					#endif
 					renderEncoder.waitForFence(computedGeometryFence, before: .vertex)
 					
 					renderEncoder.setCullMode(.back)

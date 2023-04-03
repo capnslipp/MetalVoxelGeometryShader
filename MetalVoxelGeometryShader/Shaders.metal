@@ -67,13 +67,35 @@ static_assert(sizeof(MeshVertexData_cpu) == sizeof(MeshVertexData), "The size of
 //}
 
 static CONSTANT uchar3 kCubeVertices[kVertexCountPerCube] = {
+	// Z- face
 	uchar3(0, 0, 0),
 	uchar3(1, 0, 0),
 	uchar3(0, 1, 0),
 	uchar3(1, 1, 0),
+	// Z+ face
 	uchar3(0, 0, 1),
 	uchar3(1, 0, 1),
 	uchar3(0, 1, 1),
+	uchar3(1, 1, 1),
+	// Y- face
+	uchar3(0, 0, 0),
+	uchar3(1, 0, 0),
+	uchar3(0, 0, 1),
+	uchar3(1, 0, 1),
+	// Y+ face
+	uchar3(0, 1, 0),
+	uchar3(1, 1, 0),
+	uchar3(0, 1, 1),
+	uchar3(1, 1, 1),
+	// X- face
+	uchar3(0, 0, 0),
+	uchar3(0, 1, 0),
+	uchar3(0, 0, 1),
+	uchar3(0, 1, 1),
+	// X+ face
+	uchar3(1, 0, 0),
+	uchar3(1, 1, 0),
+	uchar3(1, 0, 1),
 	uchar3(1, 1, 1),
 };
 
@@ -82,28 +104,28 @@ typedef struct _MeshTriIndexData {
 } MeshTriIndexData;
 
 static CONSTANT MeshTriIndexData kCubeTriIndices[kPrimitiveCountPerCube] = {
-	// Z-
+	// Z- face
 	(MeshTriIndexData){ 0, 2, 1 },
 	(MeshTriIndexData){ 3, 1, 2 },
-	// Z+
+	// Z+ face
 	(MeshTriIndexData){ 4, 5, 6 },
 	(MeshTriIndexData){ 7, 6, 5 },
-	// Y-
-	(MeshTriIndexData){ 0, 1, 4 },
-	(MeshTriIndexData){ 5, 4, 1 },
-	// Y+
-	(MeshTriIndexData){ 2, 6, 3 },
-	(MeshTriIndexData){ 7, 3, 6 },
-	// X-
-	(MeshTriIndexData){ 0, 4, 2 },
-	(MeshTriIndexData){ 6, 2, 4 },
-	// X+
-	(MeshTriIndexData){ 1, 3, 5 },
-	(MeshTriIndexData){ 7, 5, 3 },
+	// Y- face
+	(MeshTriIndexData){ 8, 9, 10 },
+	(MeshTriIndexData){ 11, 10, 9 },
+	// Y+ face
+	(MeshTriIndexData){ 12, 14, 13 },
+	(MeshTriIndexData){ 15, 13, 14 },
+	// X- face
+	(MeshTriIndexData){ 16, 18, 17 },
+	(MeshTriIndexData){ 19, 17, 18 },
+	// X+ face
+	(MeshTriIndexData){ 20, 21, 22 },
+	(MeshTriIndexData){ 23, 22, 21 },
 };
 
-MeshTriIndexData calculateTriIndices(uint threadI) {
-	return kCubeTriIndices[threadI];
+MeshTriIndexData calculateTriIndices(uint primitiveI) {
+	return kCubeTriIndices[primitiveI];
 }
 
 half3 calculateNormal(int threadI) {
@@ -119,25 +141,21 @@ half3 calculateNormal(int threadI) {
 	return normal;
 }
 
-static CONSTANT char3 kCubeNormals[kPrimitiveCountPerCube] = {
-	char3(-1, 0, 0),
-	char3(-1, 0, 0),
-	char3(1, 0, 0),
-	char3(1, 0, 0),
-	char3(0, -1, 0),
-	char3(0, -1, 0),
-	char3(0, 1, 0),
-	char3(0, 1, 0),
+static CONSTANT char3 kCubeNormals[kFaceCountPerCube] = {
 	char3(0, 0, -1),
-	char3(0, 0, -1),
-	char3(0, 0, 1),
-	char3(0, 0, 1),
+	char3(0, 0, +1),
+	
+	char3(0, -1, 0),
+	char3(0, +1, 0),
+	
+	char3(-1, 0, 0),
+	char3(+1, 0, 0),
 };
 
-MeshPrimitiveData calculatePrimitive(uchar threadI, ushort3 positionInGrid, uchar4 color) {
+MeshPrimitiveData calculateFace(uchar faceI, ushort3 positionInGrid, uchar4 color) {
 	return (MeshPrimitiveData){
 		/* color: */ color,
-		/* normal: */ kCubeNormals[threadI],
+		/* normal: */ kCubeNormals[faceI],
 		/* voxelCoord: */ uchar3(positionInGrid),
 	};
 }
@@ -161,6 +179,9 @@ kernel void meshGenerationKernel(
 	device uint *outputIndicesBuffer [[ buffer(2) ]],
 	ushort3 positionInGrid [[thread_position_in_grid]]
 ) {
+	if (positionInGrid.x >= voxel3DTexture.get_width() || positionInGrid.y >= voxel3DTexture.get_height() || positionInGrid.z >= voxel3DTexture.get_depth())
+		return;
+	
 	uint cubeI = ((positionInGrid.z) * voxel3DTexture.get_height() + positionInGrid.y) * voxel3DTexture.get_width() + positionInGrid.x;
 	
 	uint vertexBase = cubeI * kVertexCountPerCube;
@@ -171,32 +192,35 @@ kernel void meshGenerationKernel(
 	uchar3 position = uchar3(positionInGrid);
 	uchar4 color = uchar4(voxel3DTexture.read(positionInGrid));
 	
-	for (uchar primitiveI = 0; primitiveI < kPrimitiveCountPerCube; ++primitiveI) {
-		thread const MeshTriIndexData &triIndices = calculateTriIndices(primitiveI);
-		if (color.a > 0) {
-			outputIndices[primitiveI * 3 + 0] = indexBase + triIndices.indices[0];
-			outputIndices[primitiveI * 3 + 1] = indexBase + triIndices.indices[1];
-			outputIndices[primitiveI * 3 + 2] = indexBase + triIndices.indices[2];
-		} else {
-			outputIndices[primitiveI * 3 + 0] = 0xFFFFFFFF;
-			outputIndices[primitiveI * 3 + 1] = 0xFFFFFFFF;
-			outputIndices[primitiveI * 3 + 2] = 0xFFFFFFFF;
-		}
+	for (uchar faceI = 0; faceI < kFaceCountPerCube; ++faceI) {
+		for (uchar facePrimitiveI = 0; facePrimitiveI < kPrimitiveCountPerFace; ++facePrimitiveI) {
+			uchar primitiveI = (faceI * kPrimitiveCountPerFace) + facePrimitiveI;
+			
+			thread const MeshTriIndexData &triIndices = calculateTriIndices(primitiveI);
+			if (color.a > 0) {
+				outputIndices[primitiveI * kIndexCountPerPrimitive + 0] = vertexBase + triIndices.indices[0];
+				outputIndices[primitiveI * kIndexCountPerPrimitive + 1] = vertexBase + triIndices.indices[1];
+				outputIndices[primitiveI * kIndexCountPerPrimitive + 2] = vertexBase + triIndices.indices[2];
+			} else {
+				outputIndices[primitiveI * kIndexCountPerPrimitive + 0] = 0xFFFFFFFF;
+				outputIndices[primitiveI * kIndexCountPerPrimitive + 1] = 0xFFFFFFFF;
+				outputIndices[primitiveI * kIndexCountPerPrimitive + 2] = 0xFFFFFFFF;
+			}
+		} // primitiveI
 		
-		thread const MeshPrimitiveData &primitive = calculatePrimitive(primitiveI, positionInGrid, color);
-		outputVertices[primitiveI * 3 + 0] = (MeshVertexData){
-			position + kCubeVertices[primitiveI * 3 + 0],
-			primitive
+		thread const MeshPrimitiveData &primitive = calculateFace(faceI, positionInGrid, color);
+		
+		thread const uchar3 vertices[kVertexCountPerFace] = {
+			position + kCubeVertices[faceI * kVertexCountPerFace + 0],
+			position + kCubeVertices[faceI * kVertexCountPerFace + 1],
+			position + kCubeVertices[faceI * kVertexCountPerFace + 2],
+			position + kCubeVertices[faceI * kVertexCountPerFace + 3],
 		};
-		outputVertices[primitiveI * 3 + 1] = (MeshVertexData){
-			position + kCubeVertices[primitiveI * 3 + 1],
-			primitive
-		};
-		outputVertices[primitiveI * 3 + 2] = (MeshVertexData){
-			position + kCubeVertices[primitiveI * 3 + 2],
-			primitive
-		};
-	}
+		outputVertices[faceI * kVertexCountPerFace + 0] = (MeshVertexData){ vertices[0], primitive };
+		outputVertices[faceI * kVertexCountPerFace + 1] = (MeshVertexData){ vertices[1], primitive };
+		outputVertices[faceI * kVertexCountPerFace + 2] = (MeshVertexData){ vertices[2], primitive };
+		outputVertices[faceI * kVertexCountPerFace + 3] = (MeshVertexData){ vertices[3], primitive };
+	} // faceI
 	
 	//DEBUG_outTexture.write(uint4(uint3(positionInGrid), 0), positionInGrid);
 }

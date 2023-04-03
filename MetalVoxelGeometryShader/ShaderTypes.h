@@ -58,16 +58,20 @@
 
 
 
-// Optimized for maxTotalThreadsPerThreadgroup: 896, threadExecutionWidth: 16
+// Optimized for maxTotalThreadsPerThreadgroup: 512, threadExecutionWidth: 32
 static CONSTANT uint kCubesPerBlockX = 8;
-static CONSTANT uint kCubesPerBlockY = 7;
-static CONSTANT uint kCubesPerBlockZ = 16;
+static CONSTANT uint kCubesPerBlockY = 8;
+static CONSTANT uint kCubesPerBlockZ = 8;
 static CONSTANT uint3 kCubesPerBlockXYZ = uint3(kCubesPerBlockX, kCubesPerBlockY, kCubesPerBlockZ);
 static CONSTANT uint kCubesPerBlock = kCubesPerBlockX * kCubesPerBlockY * kCubesPerBlockZ;
 
-static CONSTANT uint kPrimitiveCountPerCube = 6 * 2;
-static CONSTANT uint kIndexCountPerCube = kPrimitiveCountPerCube * 3;
-static CONSTANT uint kVertexCountPerCube = kIndexCountPerCube;
+static CONSTANT uint kFaceCountPerCube = 6;
+static CONSTANT uint kPrimitiveCountPerFace = 2;
+static CONSTANT uint kPrimitiveCountPerCube = kFaceCountPerCube * kPrimitiveCountPerFace;
+static CONSTANT uint kIndexCountPerPrimitive = 3;
+static CONSTANT uint kIndexCountPerCube = kPrimitiveCountPerCube * kIndexCountPerPrimitive;
+static CONSTANT uint kVertexCountPerFace = 4;
+static CONSTANT uint kVertexCountPerCube = kFaceCountPerCube * kVertexCountPerFace;
 
 static CONSTANT uint kTrianglesPerModel = kPrimitiveCountPerCube;
 static CONSTANT uint kThreadsPerCube = 1;
