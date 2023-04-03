@@ -23,6 +23,10 @@
 		FA7780AF29AEFA45005092B1 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = FA7780AE29AEFA45005092B1 /* Shaders.metal */; };
 		FA7780B229AEFA49005092B1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA7780B129AEFA49005092B1 /* Assets.xcassets */; };
 		FA7780B529AEFA49005092B1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA7780B329AEFA49005092B1 /* Main.storyboard */; };
+		FA7C380229DA8BF000B83326 /* 1x1x1.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA7C380129DA8BAB00B83326 /* 1x1x1.vox */; };
+		FA7C380329DA8BF100B83326 /* 1x1x1.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA7C380129DA8BAB00B83326 /* 1x1x1.vox */; };
+		FA91755629DA9BC100B98AFF /* rgbw_cmyk.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA91755529DA9BC100B98AFF /* rgbw_cmyk.vox */; };
+		FA91755729DA9BC100B98AFF /* rgbw_cmyk.vox in Resources */ = {isa = PBXBuildFile; fileRef = FA91755529DA9BC100B98AFF /* rgbw_cmyk.vox */; };
 		FAA6CED429D67C4900EECC6C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA6CED329D67C4900EECC6C /* AppDelegate.swift */; };
 		FAA6CED929D67C4900EECC6C /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA6CED829D67C4900EECC6C /* GameViewController.swift */; };
 		FAA6CEDE29D67C4900EECC6C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FAA6CEDC29D67C4900EECC6C /* Main.storyboard */; };
@@ -130,6 +134,8 @@
 		FA7780B129AEFA49005092B1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FA7780B429AEFA49005092B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FA7780B629AEFA49005092B1 /* MetalVoxelGeometryShader.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MetalVoxelGeometryShader.entitlements; sourceTree = "<group>"; };
+		FA7C380129DA8BAB00B83326 /* 1x1x1.vox */ = {isa = PBXFileReference; lastKnownFileType = file; path = 1x1x1.vox; sourceTree = "<group>"; };
+		FA91755529DA9BC100B98AFF /* rgbw_cmyk.vox */ = {isa = PBXFileReference; lastKnownFileType = file; path = rgbw_cmyk.vox; sourceTree = "<group>"; };
 		FAA6CED129D67C4900EECC6C /* MetalVoxelGeometryShader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalVoxelGeometryShader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAA6CED329D67C4900EECC6C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FAA6CED829D67C4900EECC6C /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
@@ -192,6 +198,8 @@
 		FA65CD7229D652AD006F6391 /* VoxModels */ = {
 			isa = PBXGroup;
 			children = (
+				FA91755529DA9BC100B98AFF /* rgbw_cmyk.vox */,
+				FA7C380129DA8BAB00B83326 /* 1x1x1.vox */,
 				FA65CD7329D652AD006F6391 /* monu7.vox */,
 				FA65CD7429D652AD006F6391 /* chr_sword.vox */,
 				FA65CD7529D652AD006F6391 /* master.Brownstone.NSide.vox */,
@@ -399,8 +407,10 @@
 			files = (
 				FA65CD7A29D652AE006F6391 /* ParkSingle.Christmas2018.vox in Resources */,
 				FA65CD7929D652AE006F6391 /* master.Brownstone.NSide.vox in Resources */,
+				FA7C380229DA8BF000B83326 /* 1x1x1.vox in Resources */,
 				FA7780B229AEFA49005092B1 /* Assets.xcassets in Resources */,
 				FA7780B529AEFA49005092B1 /* Main.storyboard in Resources */,
+				FA91755629DA9BC100B98AFF /* rgbw_cmyk.vox in Resources */,
 				FA65CD7729D652AE006F6391 /* monu7.vox in Resources */,
 				FA65CD7829D652AE006F6391 /* chr_sword.vox in Resources */,
 			);
@@ -417,6 +427,8 @@
 				FAA6CEEE29D67CE000EECC6C /* Assets.xcassets in Resources */,
 				FAA6CEE929D67CD700EECC6C /* ParkSingle.Christmas2018.vox in Resources */,
 				FAA6CEDE29D67C4900EECC6C /* Main.storyboard in Resources */,
+				FA91755729DA9BC100B98AFF /* rgbw_cmyk.vox in Resources */,
+				FA7C380329DA8BF100B83326 /* 1x1x1.vox in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
