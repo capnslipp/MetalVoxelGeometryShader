@@ -37,6 +37,8 @@ class Renderer : NSObject, MTKViewDelegate
 	var renderPipelineState: MTLRenderPipelineState?
 	var depthState: MTLDepthStencilState!
 	var voxelTexture: MTLTexture!
+	var voxelCount: Int!
+	var voxelBuffer: MTLBuffer!
 	
 	let inFlightSemaphore = DispatchSemaphore(value: maxBuffersInFlight)
 	
@@ -112,8 +114,17 @@ class Renderer : NSObject, MTKViewDelegate
 				kMDLVoxelAssetOptionSkipNonZeroShellMesh: true,
 				kMDLVoxelAssetOptionConvertZUpToYUp: false
 			])
-			print("asset.models.first!.voxelCount: \(asset.models.first!.voxelCount)")
+			let assetModel = asset.models.first!
+			print("assetModel.voxelCount: \(assetModel.voxelCount)")
+			
 			self.voxelTexture = device.makeVoxel3DTextureRGBA(fromAsset: asset)!
+			
+			self.voxelCount = Int(assetModel.voxelCount)
+			self.voxelBuffer = device.makeBuffer(
+				bytes: (assetModel.voxelArray.voxelIndices()! as NSData).bytes,
+				length: Int(assetModel.voxelCount) * MemoryLayout<MDLVoxelIndex>.size,
+				options: [ .cpuCacheModeWriteCombined, .storageModeShared ]
+			)
 		} catch {
 			print("Unable to generate texture. Error info: \(error)")
 			return nil
@@ -241,10 +252,10 @@ class Renderer : NSObject, MTKViewDelegate
 	}
 
 	func buildComputeMeshBuffers() throws {
-		let voxelSize = self.voxelTexture.size
-		let voxelCount = voxelSize.width * voxelSize.height * voxelSize.depth
+		//let voxelSize = self.voxelTexture.size
+		//let voxelCount = voxelSize.width * voxelSize.height * voxelSize.depth
 		
-		self.meshVerticesCount = voxelCount * Int(kVertexCountPerCube)
+		self.meshVerticesCount = self.voxelCount * Int(kVertexCountPerCube)
 		self.meshVerticesBuffer = with(device.makeBuffer(
 			length: self.meshVerticesCount * kMeshVertexDataSize,
 			options: [ .storageModePrivate ]
@@ -252,7 +263,7 @@ class Renderer : NSObject, MTKViewDelegate
 			$0.label = "Generated Mesh Vertices Buffer"
 		}
 		
-		self.meshIndicesCount = voxelCount * Int(kIndexCountPerCube)
+		self.meshIndicesCount = self.voxelCount * Int(kIndexCountPerCube)
 		self.meshIndicesBuffer = with(device.makeBuffer(
 			length: meshIndicesCount * MemoryLayout<UInt32>.size,
 			options: [ .storageModePrivate ]
@@ -293,6 +304,8 @@ class Renderer : NSObject, MTKViewDelegate
 		uniforms[0].viewMatrix = viewMatrix
 		uniforms[0].modelViewMatrix = simd_mul(viewMatrix, modelMatrix)
 		rotation += 0.01
+		
+		uniforms[0].voxelCount = UInt32(self.voxelCount)
 	}
 	
 	
@@ -335,8 +348,11 @@ class Renderer : NSObject, MTKViewDelegate
 					
 					computeEncoder.setComputePipelineState(computePipelineState)
 					
+					computeEncoder.setBuffer(self.dynamicUniformBuffer, offset: self.uniformBufferOffset, index: 0)
+					
 					//computeEncoder.useResource(self.voxelTexture, usage: .read)
-					computeEncoder.setTexture(self.voxelTexture, index: 0)
+					//computeEncoder.setTexture(self.voxelTexture, index: 0)
+					computeEncoder.setBuffer(self.voxelBuffer, offset: 0, index: 3)
 					//computeEncoder.setTexture(self.DEBUG_computeOutTexture, index: 1)
 					
 					//computeEncoder.useResource(self.meshVerticesBuffer, usage: .write)
@@ -344,10 +360,11 @@ class Renderer : NSObject, MTKViewDelegate
 					computeEncoder.setBuffer(self.meshIndicesBuffer, offset: 0, index: 2)
 					
 					
-					let threadsPerThreadgroup = MTLSize(kCubesPerBlockXYZ)
+					let threadsPerThreadgroup = MTLSize(width: self.computePipelineState!.threadExecutionWidth)
 					
 					// threadgroupsPerGrid: The number of threadgroups in the object (if present) or mesh shader grid.
-					let threadgroupsPerGrid = self.voxelTexture.size.dividing(by: threadsPerThreadgroup, round: .awayFromZero)
+					//let threadgroupsPerGrid = self.voxelTexture.size.dividing(by: threadsPerThreadgroup, round: .awayFromZero)
+					let threadgroupsPerGrid = MTLSize(width: self.voxelCount).dividing(by: threadsPerThreadgroup, round: .awayFromZero)
 					//let objectThreadgroupCount = MTLSize(width: kMaxTotalThreadgroupsPerMeshGrid)
 					
 					// threadsPerObjectThreadgroup: The number of threads in one object shader threadgroup. Ignored if object shader is not present.
@@ -357,7 +374,7 @@ class Renderer : NSObject, MTKViewDelegate
 					//let meshThreadCount = MTLSize(width: kThreadsPerCube)
 					
 					//renderEncoder.drawMeshThreadgroups(objectThreadgroupCount, threadsPerObjectThreadgroup: objectThreadCount, threadsPerMeshThreadgroup: meshThreadCount)
-					computeEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: MTLSize(kCubesPerBlockXYZ))
+					computeEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
 					
 					computeEncoder.updateFence(computedGeometryFence)
 					

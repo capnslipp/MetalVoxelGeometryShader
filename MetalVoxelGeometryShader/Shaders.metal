@@ -88,13 +88,13 @@ static CONSTANT uchar3 kCubeVertices[kVertexCountPerCube] = {
 	uchar3(1, 1, 1),
 };
 
-uchar3 calculateVertexPosition(uchar faceI, uchar vertexI, uchar3 position) {
-	return position + kCubeVertices[faceI * kVertexCountPerFace + vertexI];
+uchar3 calculateVertexPosition(uchar faceI, uchar vertexI, uchar3 voxelCoord) {
+	return voxelCoord + kCubeVertices[faceI * kVertexCountPerFace + vertexI];
 }
 
-MeshVertexData calculateVertex(uchar faceI, uchar vertexI, uchar3 position, thread const MeshPrimitiveData &primitive) {
+MeshVertexData calculateVertex(uchar faceI, uchar vertexI, uchar3 voxelCoord, thread const MeshPrimitiveData &primitive) {
 	return (MeshVertexData){
-		/* position: */ calculateVertexPosition(faceI, vertexI, position),
+		/* position: */ calculateVertexPosition(faceI, vertexI, voxelCoord),
 		/* primitive: */ primitive,
 	};
 }
@@ -155,10 +155,10 @@ static CONSTANT char3 kCubeNormals[kFaceCountPerCube] = {
 };
 
 
-MeshPrimitiveData calculateFace(uchar faceI, ushort3 positionInGrid) {
+MeshPrimitiveData calculateFace(uchar faceI, uchar3 voxelCoord) {
 	return (MeshPrimitiveData){
 		/* normal: */ kCubeNormals[faceI],
-		/* voxelCoord: */ uchar3(positionInGrid),
+		/* voxelCoord: */ voxelCoord,
 	};
 }
 
@@ -175,24 +175,24 @@ MeshPrimitiveData calculateFace(uchar faceI, ushort3 positionInGrid) {
 
 kernel void meshGenerationKernel(
 	constant Uniforms & uniforms [[ buffer(0) ]],
-	texture3d<ushort, access::read> voxel3DTexture [[ texture(0) ]],
+	//texture3d<ushort, access::read> voxel3DTexture [[ texture(0) ]],
+	device const int4 *voxels [[ buffer(3) ]],
 	//texture3d<uint, access::write> DEBUG_outTexture [[ texture(1) ]],
 	device MeshVertexData *outputVerticesBuffer [[ buffer(1) ]],
 	device uint *outputIndicesBuffer [[ buffer(2) ]],
-	ushort3 positionInGrid [[thread_position_in_grid]]
+	uint cubeI [[thread_position_in_grid]]
 ) {
-	if (positionInGrid.x >= voxel3DTexture.get_width() || positionInGrid.y >= voxel3DTexture.get_height() || positionInGrid.z >= voxel3DTexture.get_depth())
+	if (cubeI >= uniforms.voxelCount)
 		return;
 	
-	uint cubeI = ((positionInGrid.z) * voxel3DTexture.get_height() + positionInGrid.y) * voxel3DTexture.get_width() + positionInGrid.x;
+	int4 voxel = voxels[cubeI];
 	
 	uint vertexBaseI = cubeI * kVertexCountPerCube;
 	device MeshVertexData *outputVertices = &outputVerticesBuffer[vertexBaseI];
 	uint indexBaseI = cubeI * kIndexCountPerCube;
 	device uint *outputIndices = &outputIndicesBuffer[indexBaseI];
 	
-	uchar3 position = uchar3(positionInGrid);
-	uchar4 color = uchar4(voxel3DTexture.read(positionInGrid));
+	uchar3 voxelCoord = uchar3(voxel.xyz);
 	
 	for (uchar faceI = 0; faceI < kFaceCountPerCube; ++faceI) {
 		uint faceVertexBaseI = faceI * kVertexCountPerFace;
@@ -201,24 +201,18 @@ kernel void meshGenerationKernel(
 			uchar primitiveI = (faceI * kPrimitiveCountPerFace) + facePrimitiveI;
 			
 			thread const MeshTriIndexData &triIndices = calculateTriIndices(primitiveI);
-			if (color.a > 0) {
-				outputIndices[primitiveI * kIndexCountPerPrimitive + 0] = vertexBaseI + triIndices.indices[0];
-				outputIndices[primitiveI * kIndexCountPerPrimitive + 1] = vertexBaseI + triIndices.indices[1];
-				outputIndices[primitiveI * kIndexCountPerPrimitive + 2] = vertexBaseI + triIndices.indices[2];
-			} else {
-				outputIndices[primitiveI * kIndexCountPerPrimitive + 0] = 0xFFFFFFFF;
-				outputIndices[primitiveI * kIndexCountPerPrimitive + 1] = 0xFFFFFFFF;
-				outputIndices[primitiveI * kIndexCountPerPrimitive + 2] = 0xFFFFFFFF;
-			}
+			outputIndices[primitiveI * kIndexCountPerPrimitive + 0] = vertexBaseI + triIndices.indices[0];
+			outputIndices[primitiveI * kIndexCountPerPrimitive + 1] = vertexBaseI + triIndices.indices[1];
+			outputIndices[primitiveI * kIndexCountPerPrimitive + 2] = vertexBaseI + triIndices.indices[2];
 		} // primitiveI
 		
-		thread const MeshPrimitiveData &primitive = calculateFace(faceI, positionInGrid);
+		thread const MeshPrimitiveData &primitive = calculateFace(faceI, voxelCoord);
 		
 		device MeshVertexData *outputFaceVertices = &outputVertices[faceVertexBaseI];
-		outputFaceVertices[0] = calculateVertex(faceI, 0, position, primitive);
-		outputFaceVertices[1] = calculateVertex(faceI, 1, position, primitive);
-		outputFaceVertices[2] = calculateVertex(faceI, 2, position, primitive);
-		outputFaceVertices[3] = calculateVertex(faceI, 3, position, primitive);
+		outputFaceVertices[0] = calculateVertex(faceI, 0, voxelCoord, primitive);
+		outputFaceVertices[1] = calculateVertex(faceI, 1, voxelCoord, primitive);
+		outputFaceVertices[2] = calculateVertex(faceI, 2, voxelCoord, primitive);
+		outputFaceVertices[3] = calculateVertex(faceI, 3, voxelCoord, primitive);
 	} // faceI
 	
 	//DEBUG_outTexture.write(uint4(uint3(positionInGrid), 0), positionInGrid);
