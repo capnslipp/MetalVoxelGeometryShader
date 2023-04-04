@@ -262,9 +262,8 @@ class Renderer : NSObject, MTKViewDelegate
 		
 		self.meshVertexDescriptor = with(MTLVertexDescriptor()){
 			$0.attributes[0].set(format: .uchar3, offset: kMeshVertexDataOffsetOfPosition, bufferIndex: 0)
-			$0.attributes[1].set(format: .uchar4, offset: kMeshVertexDataOffsetOfPrimitive + kMeshPrimitiveDataOffsetOfColor, bufferIndex: 0)
-			$0.attributes[2].set(format: .char3, offset: kMeshVertexDataOffsetOfPrimitive + kMeshPrimitiveDataOffsetOfNormal, bufferIndex: 0)
-			$0.attributes[3].set(format: .uchar3, offset: kMeshVertexDataOffsetOfPrimitive + kMeshPrimitiveDataOffsetOfVoxelCoord, bufferIndex: 0)
+			$0.attributes[1].set(format: .char3, offset: kMeshVertexDataOffsetOfPrimitive + kMeshPrimitiveDataOffsetOfNormal, bufferIndex: 0)
+			$0.attributes[2].set(format: .uchar3, offset: kMeshVertexDataOffsetOfPrimitive + kMeshPrimitiveDataOffsetOfVoxelCoord, bufferIndex: 0)
 			
 			$0.layouts[0].set(stepFunction: .perVertex, stepRate: 1, stride: MemoryLayout<MeshVertexData_cpu>.stride)
 		}
@@ -387,6 +386,7 @@ class Renderer : NSObject, MTKViewDelegate
 					//renderEncoder.setObjectBuffer(objectBuffer, offset: 0, index: 0)
 					renderEncoder.setVertexBuffer(self.meshVerticesBuffer, offset: 0, index: 0)
 					renderEncoder.setVertexBuffer(self.dynamicUniformBuffer, offset: self.uniformBufferOffset, index: 1)
+					renderEncoder.setVertexTexture(self.voxelTexture, index: 0)
 					//renderEncoder.setMeshTexture(meshTexture, atIndex: 2)
 					//renderEncoder.setVertexBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
 					//renderEncoder.setFragmentBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)

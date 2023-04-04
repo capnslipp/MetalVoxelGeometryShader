@@ -87,12 +87,10 @@ static CONSTANT size_t kObjectToMeshPayloadMemoryLength = kObjectToMeshPayloadSi
 
 
 typedef struct _MeshPrimitiveData_cpu {
-	uchar4 color;
 	char3 normal;
 	uchar3 voxelCoord;
 } MeshPrimitiveData_cpu;
 static CONSTANT size_t kMeshPrimitiveDataSize = sizeof(MeshPrimitiveData_cpu);
-static CONSTANT size_t kMeshPrimitiveDataOffsetOfColor = offsetof(MeshPrimitiveData_cpu, color);
 static CONSTANT size_t kMeshPrimitiveDataOffsetOfNormal = offsetof(MeshPrimitiveData_cpu, normal);
 static CONSTANT size_t kMeshPrimitiveDataOffsetOfVoxelCoord = offsetof(MeshPrimitiveData_cpu, voxelCoord);
 

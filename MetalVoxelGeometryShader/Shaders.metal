@@ -41,7 +41,6 @@ METAL_FUNC T inverse_lerp(T x, T y, T a) {
 // MARK: Mesh Shader - Mesh Stage
 
 typedef struct _MeshPrimitiveData {
-	uchar4 color;
 	char3 normal;
 	uchar3 voxelCoord;
 } MeshPrimitiveData;
@@ -156,9 +155,8 @@ static CONSTANT char3 kCubeNormals[kFaceCountPerCube] = {
 };
 
 
-MeshPrimitiveData calculateFace(uchar faceI, ushort3 positionInGrid, uchar4 color) {
+MeshPrimitiveData calculateFace(uchar faceI, ushort3 positionInGrid) {
 	return (MeshPrimitiveData){
-		/* color: */ color,
 		/* normal: */ kCubeNormals[faceI],
 		/* voxelCoord: */ uchar3(positionInGrid),
 	};
@@ -214,7 +212,7 @@ kernel void meshGenerationKernel(
 			}
 		} // primitiveI
 		
-		thread const MeshPrimitiveData &primitive = calculateFace(faceI, positionInGrid, color);
+		thread const MeshPrimitiveData &primitive = calculateFace(faceI, positionInGrid);
 		
 		device MeshVertexData *outputFaceVertices = &outputVertices[faceVertexBaseI];
 		outputFaceVertices[0] = calculateVertex(faceI, 0, position, primitive);
@@ -232,9 +230,8 @@ kernel void meshGenerationKernel(
 
 typedef struct _VertexIn {
 	uchar3 position [[attribute(0)]];
-	uchar4 color [[attribute(1)]];
-	char3 normal [[attribute(2)]];
-	uchar3 voxelCoord [[attribute(3)]];
+	char3 normal [[attribute(1)]];
+	uchar3 voxelCoord [[attribute(2)]];
 } VertexIn;
 
 typedef struct _VertexToFragment {
@@ -245,6 +242,7 @@ typedef struct _VertexToFragment {
 
 vertex VertexToFragment vertexShader(
 	VertexIn in [[stage_in]],
+	texture3d<ushort, access::read> voxel3DTexture [[ texture(0) ]],
 	constant Uniforms & uniforms [[ buffer(1) ]]
 ) {
 	VertexToFragment out;
@@ -255,7 +253,7 @@ vertex VertexToFragment vertexShader(
 	float4 modelPosition = float4(float3(in.position), 1.0);
 	out.position = transform * modelPosition;
 	
-	out.color = half4(in.color) / 255.0h;
+	out.color = half4(voxel3DTexture.read(ushort3(in.voxelCoord))) / 255.0h;
 	
 	out.normal = half3(in.normal);
 
