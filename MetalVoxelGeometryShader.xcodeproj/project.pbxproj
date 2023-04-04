@@ -44,6 +44,8 @@
 		FAA6CF3C29D692B700EECC6C /* MDLVoxelAsset.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FAA6CF3A29D6921800EECC6C /* MDLVoxelAsset.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FAA6CF3D29D692BC00EECC6C /* MDLVoxelAsset.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA6CF3A29D6921800EECC6C /* MDLVoxelAsset.framework */; };
 		FAA6CF3E29D692BC00EECC6C /* MDLVoxelAsset.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FAA6CF3A29D6921800EECC6C /* MDLVoxelAsset.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FAC912DD29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC912DC29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift */; };
+		FAC912DE29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC912DC29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -141,6 +143,7 @@
 		FAA6CED829D67C4900EECC6C /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		FAA6CEDD29D67C4900EECC6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FAA6CEE229D67C4B00EECC6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		FAC912DC29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLVertexFormatExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +173,7 @@
 			children = (
 				FA136DCF29DA6D430076B620 /* MTLTextureExtensions.swift */,
 				FA136DD229DA6E780076B620 /* MTLSizeExtensions.swift */,
+				FAC912DC29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -445,6 +449,7 @@
 				FA136DD329DA6E780076B620 /* MTLSizeExtensions.swift in Sources */,
 				FA7780AD29AEFA45005092B1 /* Renderer.swift in Sources */,
 				FA7780A929AEFA45005092B1 /* AppDelegate.swift in Sources */,
+				FAC912DD29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift in Sources */,
 				FA136DD029DA6D430076B620 /* MTLTextureExtensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -459,6 +464,7 @@
 				FA136DD429DA6E780076B620 /* MTLSizeExtensions.swift in Sources */,
 				FAA6CEEC29D67CDA00EECC6C /* Renderer.swift in Sources */,
 				FAA6CED429D67C4900EECC6C /* AppDelegate.swift in Sources */,
+				FAC912DE29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift in Sources */,
 				FA136DD129DA6D430076B620 /* MTLTextureExtensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
