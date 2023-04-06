@@ -83,8 +83,10 @@ class Renderer : NSObject, MTKViewDelegate
 		//print("CubeMesh_cpu.primitives align: \(MemoryLayout<CubeMesh_cpu>.offset(of: \.primitives)!)")
 		//print("kCubeMeshOffsetOfPrimitives: \(kCubeMeshOffsetOfPrimitives)")
 		
+		guard let device = metalKitView.device else { return nil }
+		self.device = device
+		
 		self.metalKitView = metalKitView
-		self.device = metalKitView.device!
 		
 		print("MPSSupportsMTLDevice: \(MPSSupportsMTLDevice(device))")
 		
@@ -103,9 +105,14 @@ class Renderer : NSObject, MTKViewDelegate
 		
 		self.uniforms = UnsafeMutableRawPointer(self.dynamicUniformBuffer.contents()).bindMemory(to: Uniforms.self, capacity:1)
 		
-		metalKitView.depthStencilPixelFormat = MTLPixelFormat.depth32Float_stencil8
-		metalKitView.colorPixelFormat = MTLPixelFormat.bgra8Unorm_srgb
-		metalKitView.sampleCount = 1
+		with(self.metalKitView){
+			$0.depthStencilPixelFormat = MTLPixelFormat.depth32Float_stencil8
+			$0.colorPixelFormat = MTLPixelFormat.bgra8Unorm_srgb
+			
+			if device.supportsTextureSampleCount(4) {
+				$0.sampleCount = 4
+			}
+		}
 		
 		do {
 			let path = Bundle.main.path(forResource: "master.Brownstone.NSide", ofType: "vox")!
@@ -164,7 +171,7 @@ class Renderer : NSObject, MTKViewDelegate
 		}
 		
 		do {
-			renderPipelineState = try buildRenderPipelineWithDevice()
+			renderPipelineState = try buildRenderPipelineWithDevice(rasterSampleCount: self.metalKitView.sampleCount)
 		} catch {
 			print("Unable to compile render pipeline state. Error info: \(error)")
 			return nil
@@ -206,7 +213,7 @@ class Renderer : NSObject, MTKViewDelegate
 		return state
 	}
 
-	func buildRenderPipelineWithDevice() throws -> MTLRenderPipelineState
+	func buildRenderPipelineWithDevice(rasterSampleCount: Int = 1) throws -> MTLRenderPipelineState
 	{
 		let (state, _) = try self.device.makeRenderPipelineState(
 			descriptor: with(.init()) {
@@ -222,6 +229,8 @@ class Renderer : NSObject, MTKViewDelegate
 				$0.vertexFunction = vertexFunction
 				let fragmentFunction = library.makeFunction(name: "fragmentShader")
 				$0.fragmentFunction = fragmentFunction
+				
+				$0.rasterSampleCount = rasterSampleCount
 				
 				with($0.colorAttachments[0]){
 					$0.pixelFormat = metalKitView.colorPixelFormat
