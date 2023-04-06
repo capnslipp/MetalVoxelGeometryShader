@@ -100,32 +100,28 @@ MeshVertexData calculateVertex(uchar faceI, uchar vertexI, uchar3 voxelCoord, th
 }
 
 
-typedef struct _MeshTriIndexData {
-	uchar indices[3];
-} MeshTriIndexData;
-
-static CONSTANT MeshTriIndexData kCubeTriIndices[kPrimitiveCountPerCube] = {
+static CONSTANT uchar3 kCubeTriIndices[kPrimitiveCountPerCube] = {
 	// Z- face
-	(MeshTriIndexData){ 0, 2, 1 },
-	(MeshTriIndexData){ 3, 1, 2 },
+	uchar3(0, 2, 1),
+	uchar3(3, 1, 2),
 	// Z+ face
-	(MeshTriIndexData){ 4, 5, 6 },
-	(MeshTriIndexData){ 7, 6, 5 },
+	uchar3(4, 5, 6),
+	uchar3(7, 6, 5),
 	// Y- face
-	(MeshTriIndexData){ 8, 9, 10 },
-	(MeshTriIndexData){ 11, 10, 9 },
+	uchar3(8, 9, 10),
+	uchar3(11, 10, 9),
 	// Y+ face
-	(MeshTriIndexData){ 12, 14, 13 },
-	(MeshTriIndexData){ 15, 13, 14 },
+	uchar3(12, 14, 13),
+	uchar3(15, 13, 14),
 	// X- face
-	(MeshTriIndexData){ 16, 18, 17 },
-	(MeshTriIndexData){ 19, 17, 18 },
+	uchar3(16, 18, 17),
+	uchar3(19, 17, 18),
 	// X+ face
-	(MeshTriIndexData){ 20, 21, 22 },
-	(MeshTriIndexData){ 23, 22, 21 },
+	uchar3(20, 21, 22),
+	uchar3(23, 22, 21),
 };
 
-MeshTriIndexData calculateTriIndices(uint primitiveI) {
+uchar3 calculateTriIndices(uint primitiveI) {
 	return kCubeTriIndices[primitiveI];
 }
 
@@ -200,10 +196,10 @@ kernel void meshGenerationKernel(
 		for (uchar facePrimitiveI = 0; facePrimitiveI < kPrimitiveCountPerFace; ++facePrimitiveI) {
 			uchar primitiveI = (faceI * kPrimitiveCountPerFace) + facePrimitiveI;
 			
-			thread const MeshTriIndexData &triIndices = calculateTriIndices(primitiveI);
-			outputIndices[primitiveI * kIndexCountPerPrimitive + 0] = vertexBaseI + triIndices.indices[0];
-			outputIndices[primitiveI * kIndexCountPerPrimitive + 1] = vertexBaseI + triIndices.indices[1];
-			outputIndices[primitiveI * kIndexCountPerPrimitive + 2] = vertexBaseI + triIndices.indices[2];
+			uchar3 triIndices = calculateTriIndices(primitiveI);
+			outputIndices[primitiveI * kIndexCountPerPrimitive + 0] = vertexBaseI + triIndices[0];
+			outputIndices[primitiveI * kIndexCountPerPrimitive + 1] = vertexBaseI + triIndices[1];
+			outputIndices[primitiveI * kIndexCountPerPrimitive + 2] = vertexBaseI + triIndices[2];
 		} // primitiveI
 		
 		thread const MeshPrimitiveData &primitive = calculateFace(faceI, voxelCoord);
