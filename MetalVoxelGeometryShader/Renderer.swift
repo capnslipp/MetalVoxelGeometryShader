@@ -140,16 +140,17 @@ class Renderer : NSObject, MTKViewDelegate
 		do {
 			try buildComputeMeshBuffers()
 			
-			let size = MTLSize(kCubesPerBlockXYZ)
+			let size = MTLSize(width: min(self.voxelCount, 16384))
 			self.DEBUG_computeOutTexture = device.makeTexture(descriptor: with(.textureBufferDescriptor(
 				with: .rgba32Uint,
 				width: size.width,
 				usage: .shaderWrite
 			)){
-				$0.textureType = .type3D
+				$0.textureType = .type1DArray
 				$0.width = size.width
 				$0.height = size.height
 				$0.depth = size.depth
+				$0.arrayLength = Int(kPrimitiveCountPerCube)
 				
 				$0.storageMode = .private
 			})!

@@ -173,7 +173,7 @@ kernel void meshGenerationKernel(
 	constant Uniforms & uniforms [[ buffer(0) ]],
 	//texture3d<ushort, access::read> voxel3DTexture [[ texture(0) ]],
 	device const int4 *voxels [[ buffer(3) ]],
-	//texture3d<uint, access::write> DEBUG_outTexture [[ texture(1) ]],
+	//texture1d_array<uint, access::write> DEBUG_outTexture [[ texture(1) ]],
 	device MeshVertexData *outputVerticesBuffer [[ buffer(1) ]],
 	device uint *outputIndicesBuffer [[ buffer(2) ]],
 	uint cubeI [[thread_position_in_grid]]
@@ -211,7 +211,12 @@ kernel void meshGenerationKernel(
 		outputFaceVertices[3] = calculateVertex(faceI, 3, voxelCoord, primitive);
 	} // faceI
 	
-	//DEBUG_outTexture.write(uint4(uint3(positionInGrid), 0), positionInGrid);
+	//if (cubeI < 16384)
+	//	DEBUG_outTexture.write(
+	//		/* color: */ uint4(triIndices[0], triIndices[1], triIndices[2], 0),
+	//		/* coord: */ cubeI,
+	//		/* array index: */ uint(primitiveI)
+	//	);
 }
 
 
