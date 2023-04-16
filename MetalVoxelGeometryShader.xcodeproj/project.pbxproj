@@ -44,6 +44,8 @@
 		FAA6CF3C29D692B700EECC6C /* MDLVoxelAsset.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FAA6CF3A29D6921800EECC6C /* MDLVoxelAsset.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FAA6CF3D29D692BC00EECC6C /* MDLVoxelAsset.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA6CF3A29D6921800EECC6C /* MDLVoxelAsset.framework */; };
 		FAA6CF3E29D692BC00EECC6C /* MDLVoxelAsset.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FAA6CF3A29D6921800EECC6C /* MDLVoxelAsset.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FAC60E4D29E3781B00C2C52A /* SIMDMatrixExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC60E4C29E3781B00C2C52A /* SIMDMatrixExtensions.swift */; };
+		FAC60E4E29E3781B00C2C52A /* SIMDMatrixExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC60E4C29E3781B00C2C52A /* SIMDMatrixExtensions.swift */; };
 		FAC60E5029E3782A00C2C52A /* Rotation3DExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC60E4F29E3782A00C2C52A /* Rotation3DExtensions.swift */; };
 		FAC60E5129E3782A00C2C52A /* Rotation3DExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC60E4F29E3782A00C2C52A /* Rotation3DExtensions.swift */; };
 		FAC912DD29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC912DC29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift */; };
@@ -145,6 +147,7 @@
 		FAA6CED829D67C4900EECC6C /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		FAA6CEDD29D67C4900EECC6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FAA6CEE229D67C4B00EECC6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		FAC60E4C29E3781B00C2C52A /* SIMDMatrixExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SIMDMatrixExtensions.swift; sourceTree = "<group>"; };
 		FAC60E4F29E3782A00C2C52A /* Rotation3DExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Rotation3DExtensions.swift; sourceTree = "<group>"; };
 		FAC912DC29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLVertexFormatExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -178,6 +181,7 @@
 				FA136DD229DA6E780076B620 /* MTLSizeExtensions.swift */,
 				FAC912DC29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift */,
 				FAC60E4F29E3782A00C2C52A /* Rotation3DExtensions.swift */,
+				FAC60E4C29E3781B00C2C52A /* SIMDMatrixExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -447,6 +451,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAC60E4D29E3781B00C2C52A /* SIMDMatrixExtensions.swift in Sources */,
 				FA3C8D9129B30D6F0097A95D /* Voxel3DTexture.swift in Sources */,
 				FA7780AF29AEFA45005092B1 /* Shaders.metal in Sources */,
 				FA7780AB29AEFA45005092B1 /* GameViewController.swift in Sources */,
@@ -463,6 +468,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAC60E4E29E3781B00C2C52A /* SIMDMatrixExtensions.swift in Sources */,
 				FAA6CEEF29D67CE300EECC6C /* Voxel3DTexture.swift in Sources */,
 				FAA6CEED29D67CDC00EECC6C /* Shaders.metal in Sources */,
 				FAA6CED929D67C4900EECC6C /* GameViewController.swift in Sources */,
