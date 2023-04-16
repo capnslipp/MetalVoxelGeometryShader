@@ -37,6 +37,8 @@ class Renderer : NSObject, MTKViewDelegate
 	var computePipelineState: MTLComputePipelineState?
 	var renderPipelineState: MTLRenderPipelineState?
 	var depthState: MTLDepthStencilState!
+	
+	var voxelAsset: MDLVoxelAsset!
 	var voxelTexture: MTLTexture!
 	var voxelCount: Int!
 	var voxelBuffer: MTLBuffer!
@@ -49,6 +51,8 @@ class Renderer : NSObject, MTKViewDelegate
 	
 	var uniforms: UnsafeMutablePointer<Uniforms>!
 	
+	var cameraPosition = Point3D(x: 0, y: 256, z: 1)
+	var cameraUp = Vector3D(z: 1)
 	var projectionTransform: ProjectiveTransform3D = .init()
 	
 	var rotationAngle: Angle2D = .init(radians: 0)
@@ -117,21 +121,28 @@ class Renderer : NSObject, MTKViewDelegate
 		
 		do {
 			let path = Bundle.main.path(forResource: "master.Brownstone.NSide", ofType: "vox")!
-			let asset = MDLVoxelAsset(url: URL(fileURLWithPath: path), options: [
+			self.voxelAsset = MDLVoxelAsset(url: URL(fileURLWithPath: path), options: [
 				kMDLVoxelAssetOptionCalculateShellLevels: true,
 				kMDLVoxelAssetOptionSkipNonZeroShellMesh: true,
 				kMDLVoxelAssetOptionConvertZUpToYUp: false
 			])
-			let assetModel = asset.models.first!
+			let assetModel = self.voxelAsset.models.first!
 			print("assetModel.voxelCount: \(assetModel.voxelCount)")
 			
-			self.voxelTexture = device.makeVoxel3DTextureRGBA(fromAsset: asset)!
+			self.voxelTexture = device.makeVoxel3DTextureRGBA(fromAsset: self.voxelAsset)!
 			
 			self.voxelCount = Int(assetModel.voxelCount)
 			self.voxelBuffer = device.makeBuffer(
 				bytes: (assetModel.voxelArray.voxelIndices()! as NSData).bytes,
 				length: Int(assetModel.voxelCount) * MemoryLayout<MDLVoxelIndex>.size,
 				options: [ .cpuCacheModeWriteCombined, .storageModeShared ]
+			)
+			
+			let assetSize = self.voxelAsset.boundingBox.maxBounds - self.voxelAsset.boundingBox.minBounds
+			self.cameraPosition = Point3D(
+				x: 0,
+				y: max(assetSize.x, assetSize.y) * 2,
+				z: 1
 			)
 		} catch {
 			print("Unable to generate texture. Error info: \(error)")
@@ -308,14 +319,41 @@ class Renderer : NSObject, MTKViewDelegate
 		
 		uniforms[0].projectionMatrix = float4x4(self.projectionTransform)
 		
-		let rotationAxis = RotationAxis3D(x: 1, y: 1, z: 0)
-		let modelMatrix = AffineTransform3D(rotation: .init(angle: self.rotationAngle, axis: rotationAxis))
-		uniforms[0].modelMatrix = float4x4(modelMatrix)
+		let yPosFacingZPosUpRotation = Rotation3D(angle: .init(degrees: -90), axis: .x)
+		let upNormal = yPosFacingZPosUpRotation.inversed() * Rotation3D.identityUpVector
+		let forwardNormal = yPosFacingZPosUpRotation.inversed() * Rotation3D.identityFacingVector
 		
-		let viewMatrix = AffineTransform3D(translation: .init(x: 0.0, y: 0.0, z: -16.0))
-		uniforms[0].viewMatrix = float4x4(viewMatrix)
+		let rotationAxis = RotationAxis3D.z
+		let assetRect = withMap(self.voxelAsset.boundingBox){ Rect3D(origin: $0.minBounds, size: ($0.maxBounds - $0.minBounds)) }
+		let modelTransform = AffineTransform3D(rotation: .init(angle: self.rotationAngle, axis: rotationAxis)) *
+			AffineTransform3D(translation: -(assetRect.center - assetRect.origin))
+		let modelMatrix = float4x4(modelTransform)
+		uniforms[0].modelMatrix = modelMatrix
 		
-		uniforms[0].modelViewMatrix = float4x4(viewMatrix * modelMatrix)
+		var cameraRotation = Rotation3D(
+			position: self.cameraPosition,
+			target: .zero,
+			up: self.cameraUp
+		)
+		//cameraRotation = cameraRotation * yPosFacingZPosUpRotation.inversed()
+		if cameraRotation.isNaN {
+			cameraRotation = Rotation3D()
+		}
+		let euler = cameraRotation.eulerAngles(order: .pitchYawRoll).angles / .pi * 180
+		dump(euler)
+		
+		let cameraTransform = AffineTransform3D(
+			rotation: cameraRotation,
+			translation: Vector3D(self.cameraPosition)
+		)
+		let viewMatrix = float4x4(
+			AffineTransform3D()
+				.rotated(by: cameraRotation.inversed())
+				.translated(by: Vector3D(self.cameraPosition))
+		)
+		uniforms[0].viewMatrix = viewMatrix
+		
+		uniforms[0].modelViewMatrix = viewMatrix * modelMatrix
 		
 		self.rotationAngle.radians += 0.01
 		
@@ -470,8 +508,10 @@ class Renderer : NSObject, MTKViewDelegate
 	{
 		/// Respond to drawable size or orientation changes here
 		
+		let fovXAt16By9 = Angle2D(degrees: 90)
+		let equivalentFovY = Angle2D(radians: (fovXAt16By9.radians * 9 / 16))
 		self.projectionTransform = ProjectiveTransform3D(
-			fovyRadians: Angle2D(degrees: 90).radians,
+			fovyRadians: equivalentFovY.radians,
 			aspectRatio: size.width / size.height,
 			nearZ: 1.0, farZ: 1000.0,
 			reverseZ: false
