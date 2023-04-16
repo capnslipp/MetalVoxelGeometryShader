@@ -53,7 +53,8 @@ class Renderer : NSObject, MTKViewDelegate
 	
 	var cameraPosition = Point3D(x: 0, y: 256, z: 1)
 	var cameraUp = Vector3D(z: 1)
-	var projectionTransform: ProjectiveTransform3D = .init()
+	var perspectiveTransform: ProjectiveTransform3D = .init()
+	var orthographicTransform: ProjectiveTransform3D = .init()
 	
 	var rotationAngle: Angle2D = .init(radians: 0)
 	
@@ -317,7 +318,8 @@ class Renderer : NSObject, MTKViewDelegate
 	{
 		/// Update any game state before rendering
 		
-		uniforms[0].projectionMatrix = float4x4(self.projectionTransform)
+		uniforms[0].projectionMatrix = float4x4(self.perspectiveTransform)
+		//uniforms[0].projectionMatrix = float4x4(self.orthographicTransform)
 		
 		let yPosFacingZPosUpRotation = Rotation3D(angle: .init(degrees: -90), axis: .x)
 		let upNormal = yPosFacingZPosUpRotation.inversed() * Rotation3D.identityUpVector
@@ -510,12 +512,16 @@ class Renderer : NSObject, MTKViewDelegate
 		
 		let fovXAt16By9 = Angle2D(degrees: 90)
 		let equivalentFovY = Angle2D(radians: (fovXAt16By9.radians * 9 / 16))
-		self.projectionTransform = ProjectiveTransform3D(
+		self.perspectiveTransform = ProjectiveTransform3D(
 			fovyRadians: equivalentFovY.radians,
 			aspectRatio: size.width / size.height,
 			nearZ: 1.0, farZ: 1000.0,
 			reverseZ: false
 		)
+		self.orthographicTransform = ProjectiveTransform3D(AffineTransform3D(
+			scale: Size3D(width: 256, height: 256, depth: 256),
+			translation: Vector3D(x: 0, y: 0, z: 0)
+		).scaledBy(z: -1).uniformlyScaled(by: 0.5).inverse!)
 	}
 }
 
