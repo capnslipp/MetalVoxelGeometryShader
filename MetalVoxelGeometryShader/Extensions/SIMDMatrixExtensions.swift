@@ -13,6 +13,7 @@ protocol SIMDMatrixExtensions
 {
 	associatedtype Scalar : SIMDScalar, BinaryFloatingPoint
 	typealias Vector = SIMD4<Scalar>
+	typealias RowVector = SIMD4<Scalar>
 	
 	init(_ floatMatrix: float4x4)
 	init(_ doubleMatrix: double4x4)
@@ -20,11 +21,15 @@ protocol SIMDMatrixExtensions
 	init(columns: [Vector])
 	var columnsArray: [Vector] { get set }
 	
+	var rows: [RowVector] { get set }
+	
 	
 	/// MARK: `simd_float4x4`/`simd_double4x4` Implemented Members
 	
 	init(columns: (Vector, Vector, Vector, Vector))
 	var columns: (Vector, Vector, Vector, Vector) { get set }
+	
+	init(rows: [Vector])
 }
 
 
@@ -75,6 +80,22 @@ extension SIMDMatrixExtensions
 		set {
 			precondition(newValue.count == 4)
 			self.columns = ( newValue[0], newValue[1], newValue[2], newValue[3] )
+		}
+	}
+	
+	
+	var rows: [RowVector] {
+		get {
+			let columns = self.columns
+			return [
+				RowVector(columns.0.x, columns.1.x, columns.2.x, columns.3.x),
+				RowVector(columns.0.y, columns.1.y, columns.2.y, columns.3.y),
+				RowVector(columns.0.z, columns.1.z, columns.2.z, columns.3.z),
+				RowVector(columns.0.w, columns.1.w, columns.2.w, columns.3.w),
+			]
+		}
+		set {
+			self = Self(rows: newValue)
 		}
 	}
 }
