@@ -29,6 +29,7 @@ class GameViewController : NSViewController
 		}
 		
 		mtkView.device = defaultDevice
+        (mtkView.layer as! CAMetalLayer).displaySyncEnabled = true
 		
 		guard let newRenderer = Renderer(metalKitView: mtkView) else {
 			print("Renderer cannot be initialized")

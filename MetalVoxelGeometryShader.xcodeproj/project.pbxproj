@@ -147,6 +147,7 @@
 		FAA6CED829D67C4900EECC6C /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		FAA6CEDD29D67C4900EECC6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FAA6CEE229D67C4B00EECC6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		FAC00D8A2A25633E006A739F /* MetalVoxelGeometryShader--iOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "MetalVoxelGeometryShader--iOS--Info.plist"; sourceTree = "<group>"; };
 		FAC60E4C29E3781B00C2C52A /* SIMDMatrixExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SIMDMatrixExtensions.swift; sourceTree = "<group>"; };
 		FAC60E4F29E3782A00C2C52A /* Rotation3DExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Rotation3DExtensions.swift; sourceTree = "<group>"; };
 		FAC912DC29DB8CDF00D88E49 /* MTLVertexFormatExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTLVertexFormatExtensions.swift; sourceTree = "<group>"; };
@@ -223,6 +224,7 @@
 		FA77809C29AEFA45005092B1 = {
 			isa = PBXGroup;
 			children = (
+				FAC00D8A2A25633E006A739F /* MetalVoxelGeometryShader--iOS--Info.plist */,
 				FA7780A729AEFA45005092B1 /* MetalVoxelGeometryShader */,
 				FAA6CEE729D67C8900EECC6C /* MetalVoxelGeometryShader-macOS */,
 				FAA6CED229D67C4900EECC6C /* MetalVoxelGeometryShader-iOS */,
@@ -693,6 +695,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UQQE2H6P34;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "MetalVoxelGeometryShader--iOS--Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -725,6 +728,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UQQE2H6P34;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "MetalVoxelGeometryShader--iOS--Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;

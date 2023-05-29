@@ -30,6 +30,7 @@ class GameViewController: UIViewController {
         
         mtkView.device = defaultDevice
         mtkView.backgroundColor = UIColor.black
+        mtkView.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
 
         guard let newRenderer = Renderer(metalKitView: mtkView) else {
             print("Renderer cannot be initialized")
